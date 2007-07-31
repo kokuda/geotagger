@@ -21,3 +21,9 @@ If possible, Geotagger will support as many image formats as possible, most nota
 == What Geotagger Is Not ==
 
 Geotagger is not a universal GPS tool that can do everything.  It will not generate KML files, it will not generate web pages.  It will not cook dinner.  It will write GPS data in EXIF headers of image files - that's it.
+
+== More Information ==
+
+More information about my background with geotagging can be found here [http://notions.okuda.ca/geotagging/ http://notions.okuda.ca/geotagging/].  This will help define what is missing from the existing tools (mostly reliability), and why I want this tool.
+
+Geotagger is being written for my own personal use but I thought that others may benefit from that, which is why I have made it public.  It is only intended, however, to be everything that I want out of the tool.
