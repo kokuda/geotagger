@@ -71,8 +71,6 @@
     <Compile Include="ScriptInterface.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="data\html\loadgpx.js" />
-    <Content Include="data\html\pocotrail.xml" />
     <Content Include="data\html\start.html" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
