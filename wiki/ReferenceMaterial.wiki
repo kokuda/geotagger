@@ -1,0 +1,14 @@
+#summary Online reference material
+
+= Introduction =
+
+This is my first time using C# so I am using a lot online documentation and tutorials describing how to do many of the things being added to Geotagger.  These is a list of some of the online reference material that was helpful in building this project.
+
+
+= Details =
+
+
+* [http://msdn2.microsoft.com/en-us/library/a0746166.aspx How to: Implement Two-Way Communication Between DHTML Code and Client Application Code]
+
+
+
