@@ -42,10 +42,10 @@ namespace Geotagger
             mWebBrowser.Document.InvokeScript(jsFunc, args);
         }
 
-        public void Test(String message)
+        // Called when user clicks on the specified lat,lng on the map.
+        public void SingleClick(float lat, float lng)
         {
-            MessageBox.Show(message, "client code");
-            CallJavaScript("test", new String[] { "called from client code" });
+            CallJavaScript("GTMInterface_CreateMarker", new String[] { lat.ToString(), lng.ToString(), "<html>Hello World</html>" });
         }
     }
 }
