@@ -50,9 +50,10 @@ namespace Geotagger
         {
             // Start the HTTP server for the browser to use.
             mHttpServer.Startup();
+            int port = mHttpServer.GetPort();
 
             // Load the page from the HttpServer.
-            webBrowser1.Navigate(new Uri("http://127.0.0.1:8080/html/start.html"));
+            webBrowser1.Navigate(new Uri("http://127.0.0.1:"+port+"/html/start.html"));
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)

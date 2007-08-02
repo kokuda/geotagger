@@ -18,6 +18,26 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+// The basis for this code was found here http://www.123aspx.com/PostReview.aspx?res=75
+// This may have originally come from here http://www.sampullara.com/http.cs
+// though the code there has evolved significantly.  There have been some 
+// changes to make it compile and run correctly.
+//
+// This is just a placeholder implementation and is not secure.  Running this
+// could be a security risk as anyone connecting to that port would have a lot
+// of access to your PC.
+//
+// The first thing we need to do is make it so it only accepts connections
+// from a local client so at least this limits the range of access.
+//
+// The next thing would be to restrict which files can be accessed.
+//
+// After that it should be simplified so that it only works for our specific
+// purpose.  It is not intended to be a full http server, just enough to get
+// a couple of pages.
+//
+//////////////////////////////////////////////////////////////////////////////
 
 using System;
 using System.Collections;
@@ -132,15 +152,15 @@ public class HttpServer
     // ============================================================
     // Data
 
-    protected int mPort;
-    protected bool mStop;
-    protected Socket mListener;
+    protected int       mPort;
+    protected bool      mStop;
+    protected Socket    mListener;
 
     // ============================================================
     // Constructor
 
     public HttpServer()
-        : this(80)
+        : this(0)
     {
     }
 
@@ -150,9 +170,23 @@ public class HttpServer
     }
 
     // ============================================================
+    // GetPort
+    public int GetPort()
+    {
+        return mPort;
+    }
+
+    // ============================================================
     // Start
     public void Startup()
     {
+        mListener = new Socket(0, SocketType.Stream, ProtocolType.Tcp);
+        IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), mPort);
+        mListener.Bind(endpoint);
+        mListener.Blocking = true;
+        mListener.Listen(-1);
+        mPort = ((IPEndPoint)mListener.LocalEndPoint).Port;
+
         mStop = false;
         Thread thread = new Thread(new ThreadStart(this.listen));
         thread.Start();
@@ -168,14 +202,8 @@ public class HttpServer
 
     // ============================================================
     // Listener
-
     private void listen()
     {
-        mListener = new Socket(0, SocketType.Stream, ProtocolType.Tcp);
-        IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), mPort);
-        mListener.Bind(endpoint);
-        mListener.Blocking = true;
-        mListener.Listen(-1);
         while (!mStop)
         {
             try
