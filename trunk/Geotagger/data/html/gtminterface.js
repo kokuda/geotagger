@@ -32,14 +32,26 @@
 // Construct Singleton with one method "Initialize".
 GTMInterface = new function()
 {
+	//////////////////////////////////////////////////////////////////////////
+	// Public members
 	this.mMapInterface = null;
 
+	//////////////////////////////////////////////////////////////////////////
+	// Initialize
 	this.Initialize = function(mapinterface)
 	{
 		this.mMapInterface = mapinterface
 	}
+	
+	//////////////////////////////////////////////////////////////////////////
+	// This object also wraps the calls into the game for consistency.
+	this.SingleClick = function(lat, lng)
+	{
+		window.external.SingleClick(lat, lng);
+	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
 // CreateMarker: Creates a marker at the given location which will popup the given
 // html when it is clicked.
 function GTMInterface_CreateMarker(lat, lng, htmltext)

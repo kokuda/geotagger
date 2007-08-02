@@ -22,11 +22,15 @@
 // Object for interfacing the GeoTagger application with Google Maps.
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
 // Create Singleton GMapInterface as Google Map interface to geotagger.
 var GMapInterface = new function()
 {
+	//////////////////////////////////////////////////////////////////////////
+	// Public members
 	this.mMap = null;
 
+	//////////////////////////////////////////////////////////////////////////
 	// Initialize GMapInterface with the Google Map
 	this.Initialize = function(map)
 	{
@@ -41,12 +45,13 @@ var GMapInterface = new function()
 				// If marker is null then this is a new point.
 				if (marker == null)
 				{
-					window.external.SingleClick(point.lat(), point.lng());
+					GTMInterface.SingleClick(point.lat(), point.lng());
 				}
 			}
 		);
 	};
 
+	//////////////////////////////////////////////////////////////////////////
 	// CreateMarker: Creates a marker at the given location which will popup the given
 	// html when it is clicked.
 	this.CreateMarker = function (lat, lng, htmltext)
