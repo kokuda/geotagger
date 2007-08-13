@@ -11,3 +11,5 @@ This is my first time using C# so I am using a lot online documentation and tuto
 * [http://msdn2.microsoft.com/en-us/library/a0746166.aspx How to: Implement Two-Way Communication Between DHTML Code and Client Application Code]
 
 * [http://renaud91.free.fr/MetaDataExtractor/ MetaDataExtractor Projet For C#]
+
+* [http://www.exif.org/ EXIF.org
