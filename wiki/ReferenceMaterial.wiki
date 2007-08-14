@@ -15,3 +15,5 @@ This is my first time using C# so I am using a lot online documentation and tuto
 * [http://www.exif.org/ EXIF.org]
 
 * [http://www.exiv2.org/index.html Exif and IPTC metadata library and tools]
+
+* [http://www.sno.phy.queensu.ca/~phil/exiftool/ ExifTool by Phil Harvey]
