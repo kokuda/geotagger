@@ -19,3 +19,5 @@ This is my first time using C# so I am using a lot online documentation and tuto
 * [http://www.sno.phy.queensu.ca/~phil/exiftool/ ExifTool by Phil Harvey]
 
 * [http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html GPS Tags]
+
+* [http://www.carto.net/projects/photoTools/gpsPhoto/ gpsPhoto.pl]
