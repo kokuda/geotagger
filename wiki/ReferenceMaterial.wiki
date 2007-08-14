@@ -13,3 +13,5 @@ This is my first time using C# so I am using a lot online documentation and tuto
 * [http://renaud91.free.fr/MetaDataExtractor/ MetaDataExtractor Projet For C#]
 
 * [http://www.exif.org/ EXIF.org]
+
+* [http://www.exiv2.org/index.html Exif and IPTC metadata library and tools]
