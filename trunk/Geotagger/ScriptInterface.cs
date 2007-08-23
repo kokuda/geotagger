@@ -31,10 +31,12 @@ namespace Geotagger
     public class ScriptInterface
     {
         private System.Windows.Forms.WebBrowser mWebBrowser;
+        private Form1 mForm;
 
-        public ScriptInterface(System.Windows.Forms.WebBrowser webBrowser)
+        public ScriptInterface(Form1 form, System.Windows.Forms.WebBrowser webBrowser)
         {
             mWebBrowser = webBrowser;
+            mForm = form;
         }
 
         public void CallJavaScript(string jsFunc, Object[] args)
@@ -45,7 +47,8 @@ namespace Geotagger
         // Called when user clicks on the specified lat,lng on the map.
         public void SingleClick(float lat, float lng)
         {
-            CallJavaScript("GTMInterface_CreateMarker", new String[] { lat.ToString(), lng.ToString(), "<html>Hello World</html>" });
+            //CallJavaScript("GTMInterface_CreateMarker", new String[] { lat.ToString(), lng.ToString(), "<html>Hello World</html>" });
+            mForm.Map_SingleClick(lat, lng);
         }
     }
 }

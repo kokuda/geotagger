@@ -58,19 +58,21 @@ namespace Geotagger
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listView1 = new System.Windows.Forms.ListView();
             this.name = new System.Windows.Forms.ColumnHeader();
+            this.location = new System.Windows.Forms.ColumnHeader();
             this.contextMenuImageList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuView = new System.Windows.Forms.ToolStripMenuItem();
             this.largeIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListLarge = new System.Windows.Forms.ImageList(this.components);
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.imageListSmall = new System.Windows.Forms.ImageList(this.components);
-            this.location = new System.Windows.Forms.ColumnHeader();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.contextMenuImageList.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -79,7 +81,7 @@ namespace Geotagger
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(701, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(779, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -122,13 +124,14 @@ namespace Geotagger
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.pictureBox1);
             this.splitContainer1.Panel1.Controls.Add(this.listView1);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.webBrowser1);
-            this.splitContainer1.Size = new System.Drawing.Size(701, 470);
-            this.splitContainer1.SplitterDistance = 233;
+            this.splitContainer1.Size = new System.Drawing.Size(779, 508);
+            this.splitContainer1.SplitterDistance = 258;
             this.splitContainer1.TabIndex = 2;
             // 
             // listView1
@@ -141,19 +144,27 @@ namespace Geotagger
             this.name,
             this.location});
             this.listView1.ContextMenuStrip = this.contextMenuImageList;
+            this.listView1.HideSelection = false;
+            this.listView1.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.listView1.LargeImageList = this.imageListLarge;
-            this.listView1.Location = new System.Drawing.Point(3, 116);
+            this.listView1.Location = new System.Drawing.Point(4, 131);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(227, 351);
+            this.listView1.Size = new System.Drawing.Size(252, 374);
             this.listView1.SmallImageList = this.imageListSmall;
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView1_ItemSelectionChanged);
             // 
             // name
             // 
             this.name.Text = "File Name";
             this.name.Width = 112;
+            // 
+            // location
+            // 
+            this.location.Text = "Location";
+            this.location.Width = 101;
             // 
             // contextMenuImageList
             // 
@@ -174,14 +185,14 @@ namespace Geotagger
             // largeIconsToolStripMenuItem
             // 
             this.largeIconsToolStripMenuItem.Name = "largeIconsToolStripMenuItem";
-            this.largeIconsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.largeIconsToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.largeIconsToolStripMenuItem.Text = "Icons";
             this.largeIconsToolStripMenuItem.Click += new System.EventHandler(this.largeIconsToolStripMenuItem_Click);
             // 
             // detailsToolStripMenuItem
             // 
             this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
-            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.detailsToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.detailsToolStripMenuItem.Text = "Details";
             this.detailsToolStripMenuItem.Click += new System.EventHandler(this.detailsToolStripMenuItem_Click);
             // 
@@ -191,6 +202,12 @@ namespace Geotagger
             this.imageListLarge.ImageSize = new System.Drawing.Size(64, 64);
             this.imageListLarge.TransparentColor = System.Drawing.Color.Transparent;
             // 
+            // imageListSmall
+            // 
+            this.imageListSmall.ColorDepth = System.Windows.Forms.ColorDepth.Depth16Bit;
+            this.imageListSmall.ImageSize = new System.Drawing.Size(16, 16);
+            this.imageListSmall.TransparentColor = System.Drawing.Color.Transparent;
+            // 
             // webBrowser1
             // 
             this.webBrowser1.AllowWebBrowserDrop = false;
@@ -199,26 +216,25 @@ namespace Geotagger
             this.webBrowser1.Location = new System.Drawing.Point(0, 0);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(464, 470);
+            this.webBrowser1.Size = new System.Drawing.Size(517, 508);
             this.webBrowser1.TabIndex = 0;
             this.webBrowser1.WebBrowserShortcutsEnabled = false;
             // 
-            // imageListSmall
+            // pictureBox1
             // 
-            this.imageListSmall.ColorDepth = System.Windows.Forms.ColorDepth.Depth16Bit;
-            this.imageListSmall.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageListSmall.TransparentColor = System.Drawing.Color.Transparent;
-            // 
-            // location
-            // 
-            this.location.Text = "Location";
-            this.location.Width = 101;
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.Location = new System.Drawing.Point(4, 3);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(172, 122);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(701, 494);
+            this.ClientSize = new System.Drawing.Size(779, 532);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -232,6 +248,7 @@ namespace Geotagger
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
             this.contextMenuImageList.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -255,6 +272,7 @@ namespace Geotagger
         private System.Windows.Forms.ToolStripMenuItem detailsToolStripMenuItem;
         private System.Windows.Forms.ImageList imageListSmall;
         private System.Windows.Forms.ColumnHeader location;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 
