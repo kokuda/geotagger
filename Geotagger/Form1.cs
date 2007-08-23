@@ -43,7 +43,7 @@ namespace Geotagger
             mHttpServer = new HttpServer(8080);
 
             // Register the callback interface to the Javascript.
-            webBrowser1.ObjectForScripting = new ScriptInterface(webBrowser1);
+            webBrowser1.ObjectForScripting = new ScriptInterface(this, webBrowser1);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -59,6 +59,17 @@ namespace Geotagger
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             mHttpServer.Shutdown();
+        }
+
+        // Pseudo events from the Javascript in the webBrowser.
+        public void Map_SingleClick(float lat, float lng)
+        {
+            // Apply this location to each of the selected images.
+            ListView.SelectedIndexCollection selectedIndices = listView1.SelectedIndices;
+            foreach (int index in selectedIndices)
+            {
+                // Apply this lat/lng to this image.
+            }
         }
 
         // End it all!
@@ -104,10 +115,14 @@ namespace Geotagger
                     // Add the image to the ImageList and ListView
                     try
                     {
-                        Image image = Image.FromFile(file);
-                        imageListLarge.Images.Add(file, image);
-                        imageListSmall.Images.Add(file, image);
-                        listView1.Items.Add(file, Path.GetFileName(file), file);
+                        // First check that the photo has not already been loaded.
+                        if (PhotoData.GetPhoto(file) == null)
+                        {
+                            PhotoData data = PhotoData.AddPhoto(file);
+                            imageListLarge.Images.Add(file, data.thumbnail);
+                            imageListSmall.Images.Add(file, data.thumbnail);
+                            listView1.Items.Add(file, Path.GetFileName(file), file);
+                        }
                     }
                     catch (System.Security.SecurityException ex)
                     {
@@ -136,6 +151,12 @@ namespace Geotagger
         private void detailsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             listView1.View = View.Details;
+        }
+
+        private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            //pictureBox1.Image = imageListLarge.Images[e.Item.Index];
+            pictureBox1.Image = PhotoData.GetPhoto(e.Item.ImageKey).thumbnail;
         }
     }
 }
