@@ -31,8 +31,10 @@ namespace Geotagger
 {
     public partial class Form1 : Form
     {
-        private HttpServer mHttpServer;
-        private GPSTrack mGPSTrack;
+        private HttpServer      mHttpServer;
+        private GPSTrack        mGPSTrack;
+        private ScriptInterface mScriptInterface;
+        private MapInterface    mMapInterface;
 
         public Form1()
         {
@@ -41,9 +43,11 @@ namespace Geotagger
             // Initialize Members
             mGPSTrack = new GPSTrack();
             mHttpServer = new HttpServer(8080);
+            mScriptInterface = new ScriptInterface(this);
+            mMapInterface = new MapInterface(webBrowser1);
 
             // Register the callback interface to the Javascript.
-            webBrowser1.ObjectForScripting = new ScriptInterface(this, webBrowser1);
+            webBrowser1.ObjectForScripting = mScriptInterface;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -92,6 +96,12 @@ namespace Geotagger
             {
                 // We have a file selected, now load it
                 mGPSTrack.LoadGPX(dialog1.FileName);
+
+                // Clear the old track
+                mMapInterface.ClearTrack();
+
+                // Now show the current track.
+                mMapInterface.ShowTrack(mGPSTrack);
             }
         }
 
