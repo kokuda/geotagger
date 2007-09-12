@@ -22,13 +22,85 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml;
+using System.Runtime.InteropServices;
 
 namespace Geotagger
 {
-    class GPSTrack
+    public class GPSTrackPoint
     {
+        public float    mLat;
+        public float    mLon;
+        public float    mEle;
+        public DateTime mTime;
+    }
+
+    public class GPSTrackPointList : List<GPSTrackPoint> { }
+
+    public class GPSTrack : GPSTrackPointList
+    {
+        //private GPSTrackPointList mGPSTrackPointList;
+
+        public GPSTrack()
+        {
+            //mGPSTrackPointList = new GPSTrackPointList();
+        }
+
         public void LoadGPX(string fileName)
         {
+            // Read the GPX file and add to the list of track log points.
+            XmlTextReader reader = new XmlTextReader(fileName);
+            string parsingName = "";
+            GPSTrackPoint parsingPoint = null;
+
+            // Empty the list first.
+            this.Clear();
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        // Store the element name
+                        parsingName = reader.Name;
+
+                        if (parsingName == "trkpt")
+                        {
+                            // Starting a track point
+                            parsingPoint = new GPSTrackPoint();
+                            parsingPoint.mLat = float.Parse(reader.GetAttribute("lat"));
+                            parsingPoint.mLon = float.Parse(reader.GetAttribute("lon"));
+                        }
+                        break;
+
+                    case XmlNodeType.Text:
+                        // Only parse elements of a track point.
+                        if (parsingPoint != null)
+                        {
+                            if (parsingName == "ele")
+                            {
+                                // elevation
+                                parsingPoint.mEle = float.Parse(reader.Value);
+                            }
+                            if (parsingName == "time")
+                            {
+                                // GMT Date and Time.
+                                parsingPoint.mTime = DateTime.Parse(reader.Value);
+                            }
+                        }
+                        break;
+
+                    case XmlNodeType.EndElement:
+                        if ((reader.Name == "trkpt") && (parsingPoint != null))
+                        {
+                            // Ending a track point.
+                            //mGPSTrackPointList.Add(parsingPoint);
+                            Add(parsingPoint);
+                            parsingPoint = null;
+                        }
+                        break;
+                }
+            }
         }
     }
 }

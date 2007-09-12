@@ -18,34 +18,51 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
 
 namespace Geotagger
 {
-    [ComVisibleAttribute(true)]
-    public class ScriptInterface
+    class MapInterface
     {
-        public ScriptInterface(Form1 form)
+        // Constructor
+        public MapInterface(System.Windows.Forms.WebBrowser webBrowser)
         {
-            mForm = form;
+            mWebBrowser = webBrowser;
         }
 
-        // Called when user clicks on the specified lat,lng on the map.
-        public void SingleClick(float lat, float lng)
+        // Clear the GPS track from the map.
+        public void ClearTrack()
         {
-            //CallJavaScript("GTMInterface_CreateMarker", new String[] { lat.ToString(), lng.ToString(), "<html>Hello World</html>" });
-            mForm.Map_SingleClick(lat, lng);
+            CallJavaScript("GTMInterface_ClearTrack");
+        }
+
+        // Show the GPS track on the map.
+        public void ShowTrack(GPSTrack track)
+        {
+            CallJavaScript("GTMInterface_StartTrack");
+            foreach (GPSTrackPoint p in track)
+            {
+                CallJavaScript("GTMInterface_AddTrackPoint", new String[] { p.mLat.ToString(), p.mLon.ToString() });
+            }
+            CallJavaScript("GTMInterface_EndTrack");
         }
 
         ///////////////////////////////////////////////////////////////////////
         // Private
         ///////////////////////////////////////////////////////////////////////
 
-        private Form1 mForm;
+        private System.Windows.Forms.WebBrowser mWebBrowser;
+
+        private void CallJavaScript(string jsFunc)
+        {
+            mWebBrowser.Document.InvokeScript(jsFunc);
+        }
+
+        private void CallJavaScript(string jsFunc, Object[] args)
+        {
+            mWebBrowser.Document.InvokeScript(jsFunc, args);
+        }
     }
 }

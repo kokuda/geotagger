@@ -66,4 +66,35 @@ var GMapInterface = new function()
 
 		mMap.addOverlay(marker);
 	};
+
+	//////////////////////////////////////////////////////////////////////////
+	// ClearTrack: Removes all track points from the map.
+	this.ClearTrack = function ()
+	{
+		mMap.clearOverlays();
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+	// StartTrack: Indicates the begining of a track point list.
+	this.StartTrack = function ()
+	{
+		var pointarray = [];
+
+		// Temporarily add a new function for adding the track points.
+		this.AddTrackPoint = function (lat, lng)
+		{
+			var latlng = new GLatLng(lat, lng);
+			pointarray.push(latlng)
+		}
+
+		this.EndTrack = function ()
+		{
+			// Remove the temporary functions
+			this.AddTrackPoint = null;
+			this.EndTrack = null;
+
+			var polyline = new GPolyline(pointarray, "#ff0000", 5, 0.8);
+			mMap.addOverlay(polyline);
+		};
+	};
 }

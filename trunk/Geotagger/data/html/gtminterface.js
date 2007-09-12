@@ -58,3 +58,31 @@ function GTMInterface_CreateMarker(lat, lng, htmltext)
 {
 	GTMInterface.mMapInterface.CreateMarker(lat,lng,htmltext);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// ClearTrack: Removes all track points from the map.
+function GTMInterface_ClearTrack(lat, lng, htmltext)
+{
+	GTMInterface.mMapInterface.ClearTrack(lat,lng,htmltext);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// StartTrack: Indicates the begining of a track point list.
+function GTMInterface_StartTrack()
+{
+	GTMInterface.mMapInterface.StartTrack();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// AddTrackPoint: Adds a track point to the map.
+function GTMInterface_AddTrackPoint(lat, lng)
+{
+	GTMInterface.mMapInterface.AddTrackPoint(lat,lng);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// EndTrack: Indicates the end of a track point list.
+function GTMInterface_EndTrack()
+{
+	GTMInterface.mMapInterface.EndTrack();
+}
