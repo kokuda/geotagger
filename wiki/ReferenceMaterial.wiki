@@ -21,3 +21,10 @@ This is my first time using C# so I am using a lot online documentation and tuto
 * [http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html GPS Tags]
 
 * [http://www.carto.net/projects/photoTools/gpsPhoto/ gpsPhoto.pl]
+
+* [http://www.pixvillage.com/blogs/devblog/archive/2005/03/17/159.aspx Loading Exif Properties in C#]
+
+* [http://www.pixvillage.com/blogs/devblog/archive/2005/03/27/176.aspx Creating Exif Properties in C#]
+
+* [http://www.pixvillage.com/blogs/devblog/archive/2005/04/19/215.aspx Converting Properties in C#]
+ 
