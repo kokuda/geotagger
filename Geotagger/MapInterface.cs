@@ -49,6 +49,11 @@ namespace Geotagger
             CallJavaScript("GTMInterface_EndTrack");
         }
 
+        public void CreateMarker(int id, GPSTrackPoint location)
+        {
+            CallJavaScript("GTMInterface_CreateMarker", new String[] { id.ToString(), location.mLat.ToString(), location.mLon.ToString() });
+        }
+
         ///////////////////////////////////////////////////////////////////////
         // Private
         ///////////////////////////////////////////////////////////////////////

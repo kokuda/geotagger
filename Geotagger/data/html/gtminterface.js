@@ -49,6 +49,16 @@ GTMInterface = new function()
 	{
 		window.external.SingleClick(lat, lng);
 	}
+	
+	this.MarkerClick = function(id)
+	{
+		window.external.MarkerClick(id);
+	}
+	
+	this.MarkerDrop = function(id, lat, lng)
+	{
+		window.external.MarkerDrop(id, lat, lng);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -85,4 +95,11 @@ function GTMInterface_AddTrackPoint(lat, lng)
 function GTMInterface_EndTrack()
 {
 	GTMInterface.mMapInterface.EndTrack();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// CreateMarker: Create a marker on the map.
+function GTMInterface_CreateMarker(id, lat, lng)
+{
+	GTMInterface.mMapInterface.CreateMarker(id, lat, lng);
 }

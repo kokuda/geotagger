@@ -28,6 +28,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 
 namespace Geotagger
@@ -71,7 +72,15 @@ namespace Geotagger
 
             mWidth = srcImage.Width;
             mHeight = srcImage.Height;
-            // More properties...
+            mDateTime = GetDateTimeOriginal(srcImage);
+
+        }
+
+        public void SetLocation(float lat, float lng, float ele)
+        {
+            mLatitude = lat;
+            mLongitude = lng;
+            mElevation = ele;
         }
 
         public Image thumbnail
@@ -95,6 +104,38 @@ namespace Geotagger
             get
             {
                 return mHeight;
+            }
+        }
+
+        public DateTime dateTime
+        {
+            get
+            {
+                return mDateTime;
+            }
+        }
+
+        public float latitude
+        {
+            get
+            {
+                return mLatitude;
+            }
+        }
+
+        public float longitude
+        {
+            get
+            {
+                return mLongitude;
+            }
+        }
+
+        public float elevation
+        {
+            get
+            {
+                return mElevation;
             }
         }
 
@@ -145,21 +186,45 @@ namespace Geotagger
             return thumbnail;
         }
 
+        private static DateTime GetDateTimeOriginal(Image img)
+        {
+            PropertyItem prop = img.GetPropertyItem(EXIF_DateTimeOriginal);
+            string date = System.Text.Encoding.ASCII.GetString(prop.Value);
+
+            System.Globalization.DateTimeFormatInfo format = new System.Globalization.DateTimeFormatInfo();
+            format.DateSeparator = ":";
+            format.TimeSeparator = ":";
+            format.FullDateTimePattern = "yyyy/MM/dd HH:mm:ss\\\0";
+            DateTime dateTime = DateTime.ParseExact(date, "F", format);
+
+            return (dateTime);
+        }
+
+
+
         //////////////////////////////////////////////////////////////////////
         // Private members
         //////////////////////////////////////////////////////////////////////
 
         // Constants
-        private const int SMALL_IMAGE_WIDTH  = 128;
-        private const int SMALL_IMAGE_HEIGHT = 128;
+        private const int SMALL_IMAGE_WIDTH  = 256;
+        private const int SMALL_IMAGE_HEIGHT = 256;
+
+        // EXIF IDs
+        private const int EXIF_DateTimeOriginal = 0x9003;
 
         // Static
         private static Hashtable sPhotoContainer = new Hashtable();
 
         // Instance
-        private Image   mThumbNail;
-        private string  mFileName;
-        private int     mWidth;
-        private int     mHeight;
+        private Image       mThumbNail;
+        private string      mFileName;
+        private int         mWidth;
+        private int         mHeight;
+        private DateTime    mDateTime;
+        private float       mLatitude;
+        private float       mLongitude;
+        private float       mElevation;
+
     }
 }
