@@ -26,6 +26,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Geotagger
 {
@@ -74,6 +75,23 @@ namespace Geotagger
             {
                 // Apply this lat/lng to this image.
             }
+        }
+
+        public void Map_MarkerClick(int photoIndex)
+        {
+            // The marker on the map was clicked, highlight the photo
+            Debug.WriteLine("MarkerClick(" + photoIndex + ")");
+            listView1.SelectedItems.Clear();
+            listView1.Items[photoIndex].Selected = true;
+        }
+
+        public void Map_MarkerDrop(int photoIndex, float lat, float lng)
+        {
+            Debug.WriteLine("MarkerDrop(" + photoIndex + "," + lat + "," + lng + ")");
+            PhotoData photoData = PhotoData.GetPhoto(listView1.Items[photoIndex].ImageKey);
+            photoData.SetLocation(lat, lng, photoData.elevation);
+            listView1.SelectedItems.Clear();
+            listView1.Items[photoIndex].Selected = true;
         }
 
         // End it all!
@@ -129,7 +147,6 @@ namespace Geotagger
                         if (PhotoData.GetPhoto(file) == null)
                         {
                             PhotoData data = PhotoData.AddPhoto(file);
-                            imageListLarge.Images.Add(file, data.thumbnail);
                             imageListSmall.Images.Add(file, data.thumbnail);
                             listView1.Items.Add(file, Path.GetFileName(file), file);
                         }
@@ -165,8 +182,39 @@ namespace Geotagger
 
         private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            //pictureBox1.Image = imageListLarge.Images[e.Item.Index];
-            pictureBox1.Image = PhotoData.GetPhoto(e.Item.ImageKey).thumbnail;
+            PhotoData photoData = PhotoData.GetPhoto(e.Item.ImageKey);
+            pictureBox1.Image = photoData.thumbnail;
+            labelTimeOutput.Text = photoData.dateTime.ToString("G");
+            labelLocationOutput.Text = photoData.latitude + "," + photoData.longitude;
+        }
+
+        private void toolStripLoadImages_Click(object sender, EventArgs e)
+        {
+            loadImagesToolStripMenuItem_Click(sender, e);
+        }
+
+        private void toolStripLoadGPX_Click(object sender, EventArgs e)
+        {
+            loadGPXToolStripMenuItem_Click(sender, e);
+        }
+
+        private void toolStripLocate_Click(object sender, EventArgs e)
+        {
+            // For each selected photo (or all if none are selected) find the closest track points
+            // on the map nearest that time.
+            ListView.SelectedIndexCollection selectedIndices = listView1.SelectedIndices;
+            foreach (int index in selectedIndices)
+            {
+                // Get the photo
+                PhotoData photoData = PhotoData.GetPhoto(listView1.Items[index].ImageKey);
+
+                // Find the nearest point
+                GPSTrackPoint location = mGPSTrack.FindNearest(photoData.dateTime);
+                Debug.WriteLine("Locating " + photoData.dateTime.ToString() + " at " + location.mLat + "," + location.mLon);
+
+                photoData.SetLocation(location.mLat, location.mLon, location.mEle);
+                mMapInterface.CreateMarker(index, location);
+            }
         }
     }
 }

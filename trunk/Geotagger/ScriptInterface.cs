@@ -42,6 +42,16 @@ namespace Geotagger
             mForm.Map_SingleClick(lat, lng);
         }
 
+        public void MarkerClick(int index)
+        {
+            mForm.Map_MarkerClick(index);
+        }
+
+        public void MarkerDrop(int index, float lat, float lng)
+        {
+            mForm.Map_MarkerDrop(index, lat, lng);
+        }
+
         ///////////////////////////////////////////////////////////////////////
         // Private
         ///////////////////////////////////////////////////////////////////////

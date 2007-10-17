@@ -97,4 +97,28 @@ var GMapInterface = new function()
 			mMap.addOverlay(polyline);
 		};
 	};
+
+	//////////////////////////////////////////////////////////////////////////
+	// CreateMarker: Create a marker on the map (probably for a photo
+	this.CreateMarker = function (id, lat, lng)
+	{
+		var marker = new GMarker(new GLatLng(lat, lng), {draggable: true, dragCrossMove: true, bouncy:true });
+		GEvent.addListener(marker, "click",
+			function()
+			{
+				GTMInterface.MarkerClick(id);
+				//marker.openInfoWindowHtml("test");
+			}
+		);
+		
+		GEvent.addListener(marker, "dragend",
+			function()
+			{
+				var latlng = marker.getLatLng();
+				GTMInterface.MarkerDrop(id, latlng.lat(), latlng.lng());
+			}
+		);
+
+		mMap.addOverlay(marker);
+	}
 }

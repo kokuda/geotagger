@@ -102,5 +102,11 @@ namespace Geotagger
                 }
             }
         }
+
+        // Find the nearest track point to the given time.
+        public GPSTrackPoint FindNearest(DateTime time)
+        {
+            return this[0];
+        }
     }
 }
