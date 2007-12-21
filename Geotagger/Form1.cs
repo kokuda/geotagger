@@ -212,8 +212,23 @@ namespace Geotagger
                 GPSTrackPoint location = mGPSTrack.FindNearest(photoData.dateTime);
                 Debug.WriteLine("Locating " + photoData.dateTime.ToString() + " at " + location.mLat + "," + location.mLon);
 
-                photoData.SetLocation(location.mLat, location.mLon, location.mEle);
-                mMapInterface.CreateMarker(index, location);
+                // If there is no markerObject on the map for this photo then add one.
+                if (photoData.markerObject == null)
+                {
+                    photoData.SetLocation(location.mLat, location.mLon, location.mEle);
+
+                    // TODO: The marker object should probably exist somewhere else.
+                    // It is not really part of the photo data, though there is one
+                    // associated with each photo.  It should be part of the Form or application
+                    // and map between photoData objects and map markers.  Perhaps this should
+                    // be stored in the listView1 object?
+                    photoData.markerObject = mMapInterface.CreateMarker(index, location);
+                }
+                else
+                {
+                    // There is already a marker on the map for this photo so just move it.
+                    mMapInterface.MoveMarker(photoData.markerObject, location);
+                }
             }
         }
     }

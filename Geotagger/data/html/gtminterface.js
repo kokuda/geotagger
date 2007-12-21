@@ -62,14 +62,6 @@ GTMInterface = new function()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// CreateMarker: Creates a marker at the given location which will popup the given
-// html when it is clicked.
-function GTMInterface_CreateMarker(lat, lng, htmltext)
-{
-	GTMInterface.mMapInterface.CreateMarker(lat,lng,htmltext);
-}
-
-//////////////////////////////////////////////////////////////////////////////
 // ClearTrack: Removes all track points from the map.
 function GTMInterface_ClearTrack(lat, lng, htmltext)
 {
@@ -101,5 +93,12 @@ function GTMInterface_EndTrack()
 // CreateMarker: Create a marker on the map.
 function GTMInterface_CreateMarker(id, lat, lng)
 {
-	GTMInterface.mMapInterface.CreateMarker(id, lat, lng);
+	return GTMInterface.mMapInterface.CreateMarker(id, lat, lng);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// MoveMarker: Move an existing marker on the map.
+function GTMInterface_MoveMarker(marker, lat, lng)
+{
+	return GTMInterface.mMapInterface.MoveMarker(marker, lat, lng);
 }

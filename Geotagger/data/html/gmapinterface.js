@@ -52,22 +52,6 @@ var GMapInterface = new function()
 	};
 
 	//////////////////////////////////////////////////////////////////////////
-	// CreateMarker: Creates a marker at the given location which will popup the given
-	// html when it is clicked.
-	this.CreateMarker = function (lat, lng, htmltext)
-	{
-		var marker = new GMarker(new GLatLng(lat,lng));
-		GEvent.addListener(marker, "click",
-			function()
-			{
-				marker.openInfoWindowHtml(htmltext);
-			}
-		);
-
-		mMap.addOverlay(marker);
-	};
-
-	//////////////////////////////////////////////////////////////////////////
 	// ClearTrack: Removes all track points from the map.
 	this.ClearTrack = function ()
 	{
@@ -120,5 +104,14 @@ var GMapInterface = new function()
 		);
 
 		mMap.addOverlay(marker);
+		
+		return marker;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// MoveMarker: Moves a marker to a new location.
+	this.MoveMarker = function (marker, lat, lng)
+	{
+		marker.setLatLng(new GLatLng(lat, lng));
 	}
 }

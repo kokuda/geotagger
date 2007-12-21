@@ -49,9 +49,20 @@ namespace Geotagger
             CallJavaScript("GTMInterface_EndTrack");
         }
 
-        public void CreateMarker(int id, GPSTrackPoint location)
+        public Object CreateMarker(int id, GPSTrackPoint location)
         {
-            CallJavaScript("GTMInterface_CreateMarker", new String[] { id.ToString(), location.mLat.ToString(), location.mLon.ToString() });
+            return CallJavaScript("GTMInterface_CreateMarker", new String[] { id.ToString(), location.mLat.ToString(), location.mLon.ToString() });
+        }
+
+        public void MoveMarker(Object marker, GPSTrackPoint location)
+        {
+            // One way to implement this is to tell the marker object to move itself.
+            // I'm not exactly sure how to implement this, though it would be interesting to try someday.
+            //Type t = marker.GetType();
+            //t.InvokeMember("MoveMarker", ...
+
+            // For now we implement it by passing this marker object back into the Action Script to manipulate.
+            CallJavaScript("GTMInterface_MoveMarker", new Object[] { marker, location.mLat.ToString(), location.mLon.ToString() });
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -60,14 +71,14 @@ namespace Geotagger
 
         private System.Windows.Forms.WebBrowser mWebBrowser;
 
-        private void CallJavaScript(string jsFunc)
+        private Object CallJavaScript(string jsFunc)
         {
-            mWebBrowser.Document.InvokeScript(jsFunc);
+            return mWebBrowser.Document.InvokeScript(jsFunc);
         }
 
-        private void CallJavaScript(string jsFunc, Object[] args)
+        private Object CallJavaScript(string jsFunc, Object[] args)
         {
-            mWebBrowser.Document.InvokeScript(jsFunc, args);
+            return mWebBrowser.Document.InvokeScript(jsFunc, args);
         }
     }
 }

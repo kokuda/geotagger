@@ -74,6 +74,9 @@ namespace Geotagger
             mHeight = srcImage.Height;
             mDateTime = GetDateTimeOriginal(srcImage);
 
+            // There is no marker until it is set.
+            mMapMarkerObject = null;
+
         }
 
         public void SetLocation(float lat, float lng, float ele)
@@ -136,6 +139,19 @@ namespace Geotagger
             get
             {
                 return mElevation;
+            }
+        }
+
+        public Object markerObject
+        {
+            get
+            {
+                return mMapMarkerObject;
+            }
+
+            set
+            {
+                mMapMarkerObject = value;
             }
         }
 
@@ -225,6 +241,7 @@ namespace Geotagger
         private float       mLatitude;
         private float       mLongitude;
         private float       mElevation;
+        private Object      mMapMarkerObject;
 
     }
 }

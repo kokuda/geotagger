@@ -106,7 +106,24 @@ namespace Geotagger
         // Find the nearest track point to the given time.
         public GPSTrackPoint FindNearest(DateTime time)
         {
-            return this[0];
+            // Initial version: Finds the first point in the track log that occured after the given time.
+            // This assumes that the track log is sorted by time.  What if the point is not found?
+
+            // TODO:
+            // 1. Use a binary search since the list is sorted.
+            // 2. Find the point before and after the specified time and interpolate between them.
+            // 3. Return all three points (before, after, and "calculated") to be stored and shown to the user.
+
+            GPSTrackPoint foundPoint = this.Find(
+                delegate(GPSTrackPoint point)
+                {
+                    // Return the first point that is greater than the given time.
+                    // Assumes that the list is sorted.
+                    return (point.mTime > time);
+                }
+            );
+
+            return foundPoint;
         }
     }
 }
