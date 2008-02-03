@@ -36,6 +36,7 @@ namespace Geotagger
         private GPSTrack        mGPSTrack;
         private ScriptInterface mScriptInterface;
         private MapInterface    mMapInterface;
+        private PhotoCollection mPhotoCollection;
 
         public Form1()
         {
@@ -46,6 +47,7 @@ namespace Geotagger
             mHttpServer = new HttpServer(8080);
             mScriptInterface = new ScriptInterface(this);
             mMapInterface = new MapInterface(webBrowser1);
+            mPhotoCollection = new PhotoCollection();
 
             // Register the callback interface to the Javascript.
             webBrowser1.ObjectForScripting = mScriptInterface;
@@ -88,8 +90,8 @@ namespace Geotagger
         public void Map_MarkerDrop(int photoIndex, float lat, float lng)
         {
             Debug.WriteLine("MarkerDrop(" + photoIndex + "," + lat + "," + lng + ")");
-            PhotoData photoData = PhotoData.GetPhoto(listView1.Items[photoIndex].ImageKey);
-            photoData.SetLocation(lat, lng, photoData.elevation);
+            PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[photoIndex].ImageKey);
+            photo.SetLocation(lat, lng, photo.elevation);
             listView1.SelectedItems.Clear();
             listView1.Items[photoIndex].Selected = true;
         }
@@ -144,9 +146,9 @@ namespace Geotagger
                     try
                     {
                         // First check that the photo has not already been loaded.
-                        if (PhotoData.GetPhoto(file) == null)
+                        if (mPhotoCollection.GetPhoto(file) == null)
                         {
-                            PhotoData data = PhotoData.AddPhoto(file);
+                            PhotoData data = mPhotoCollection.AddPhoto(file);
                             imageListSmall.Images.Add(file, data.thumbnail);
                             listView1.Items.Add(file, Path.GetFileName(file), file);
                         }
@@ -182,10 +184,10 @@ namespace Geotagger
 
         private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            PhotoData photoData = PhotoData.GetPhoto(e.Item.ImageKey);
-            pictureBox1.Image = photoData.thumbnail;
-            labelTimeOutput.Text = photoData.dateTime.ToString("G");
-            labelLocationOutput.Text = photoData.latitude + "," + photoData.longitude;
+            PhotoData photo = mPhotoCollection.GetPhoto(e.Item.ImageKey);
+            pictureBox1.Image = photo.thumbnail;
+            labelTimeOutput.Text = photo.dateTime.ToString("G");
+            labelLocationOutput.Text = photo.latitude + "," + photo.longitude;
         }
 
         private void toolStripLoadImages_Click(object sender, EventArgs e)
@@ -206,28 +208,83 @@ namespace Geotagger
             foreach (int index in selectedIndices)
             {
                 // Get the photo
-                PhotoData photoData = PhotoData.GetPhoto(listView1.Items[index].ImageKey);
+                PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[index].ImageKey);
 
                 // Find the nearest point
-                GPSTrackPoint location = mGPSTrack.FindNearest(photoData.dateTime);
-                Debug.WriteLine("Locating " + photoData.dateTime.ToString() + " at " + location.mLat + "," + location.mLon);
+                GPSTrackNearestPoint location = mGPSTrack.FindNearest(photo.dateTime);
+                Debug.WriteLine("Locating " + photo.dateTime.ToString() + " at " + location.mCalculated.mLat + "," + location.mCalculated.mLon);
+
+                // Store the calculated location.
+                photo.nearestPoint = location;
 
                 // If there is no markerObject on the map for this photo then add one.
-                if (photoData.markerObject == null)
+                if (photo.markerObject == null)
                 {
-                    photoData.SetLocation(location.mLat, location.mLon, location.mEle);
-
-                    // TODO: The marker object should probably exist somewhere else.
-                    // It is not really part of the photo data, though there is one
-                    // associated with each photo.  It should be part of the Form or application
-                    // and map between photoData objects and map markers.  Perhaps this should
-                    // be stored in the listView1 object?
-                    photoData.markerObject = mMapInterface.CreateMarker(index, location);
+                    photo.SetLocation(location.mCalculated.mLat, location.mCalculated.mLon, location.mCalculated.mEle);
+                    photo.markerObject = mMapInterface.CreateMarker(index, location.mCalculated);
                 }
                 else
                 {
                     // There is already a marker on the map for this photo so just move it.
-                    mMapInterface.MoveMarker(photoData.markerObject, location);
+                    photo.SetLocation(location.mCalculated.mLat, location.mCalculated.mLon, location.mCalculated.mEle);
+                    mMapInterface.MoveMarker(photo.markerObject, location.mCalculated);
+                }
+            }
+        }
+
+        private void useCalculatedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // For each selected photo (or none if none are selected) set the photos
+            // back to the previously calculated position.
+            ListView.SelectedIndexCollection selectedIndices = listView1.SelectedIndices;
+            foreach (int index in selectedIndices)
+            {
+                // Get the photo
+                PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[index].ImageKey);
+                if (photo.nearestPoint != null)
+                {
+                    // There is already a marker on the map for this photo so just move it.
+                    GPSTrackPoint location = photo.nearestPoint.mCalculated;
+                    photo.SetLocation(location.mLat, location.mLon, location.mEle);
+                    mMapInterface.MoveMarker(photo.markerObject, location);
+                }
+            }
+        }
+
+        private void usePreviousToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // For each selected photo (or none if none are selected) move the photo
+            // to the nearest track point before the calculated point.
+            ListView.SelectedIndexCollection selectedIndices = listView1.SelectedIndices;
+            foreach (int index in selectedIndices)
+            {
+                // Get the photo
+                PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[index].ImageKey);
+                if (photo.nearestPoint != null)
+                {
+                    // There is already a marker on the map for this photo so just move it.
+                    GPSTrackPoint location = photo.nearestPoint.mBefore;
+                    photo.SetLocation(location.mLat, location.mLon, location.mEle);
+                    mMapInterface.MoveMarker(photo.markerObject, location);
+                }
+            }
+        }
+
+        private void useNextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // For each selected photo (or none if none are selected) move the photos
+            // to the nearest track point after the calculated point.
+            ListView.SelectedIndexCollection selectedIndices = listView1.SelectedIndices;
+            foreach (int index in selectedIndices)
+            {
+                // Get the photo
+                PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[index].ImageKey);
+                if (photo.nearestPoint != null)
+                {
+                    // There is already a marker on the map for this photo so just move it.
+                    GPSTrackPoint location = photo.nearestPoint.mAfter;
+                    photo.SetLocation(location.mLat, location.mLon, location.mEle);
+                    mMapInterface.MoveMarker(photo.markerObject, location);
                 }
             }
         }
