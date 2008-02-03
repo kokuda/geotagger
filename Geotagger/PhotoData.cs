@@ -21,7 +21,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // PhotoData contains the relevant data about a photograph.
 // The class itself represents useful information about a photograph.
-// The static data and methods contain the list of photo data used by Geotagger.
 //////////////////////////////////////////////////////////////////////////////
 
 using System;
@@ -35,26 +34,6 @@ namespace Geotagger
 {
     class PhotoData
     {
-        //////////////////////////////////////////////////////////////////////
-        // public static methods
-        //////////////////////////////////////////////////////////////////////
-
-        public static PhotoData AddPhoto(string fileName)
-        {
-            sPhotoContainer.Add(fileName, new PhotoData(fileName));
-            return (PhotoData)sPhotoContainer[fileName];
-        }
-
-        public static PhotoData GetPhoto(string fileName)
-        {
-            return (PhotoData)sPhotoContainer[fileName];
-        }
-
-        public static int GetCount()
-        {
-            return sPhotoContainer.Count;
-        }
-
         //////////////////////////////////////////////////////////////////////
         // public methods
         //////////////////////////////////////////////////////////////////////
@@ -76,6 +55,7 @@ namespace Geotagger
 
             // There is no marker until it is set.
             mMapMarkerObject = null;
+            mNearestPoint = null;
 
         }
 
@@ -155,6 +135,19 @@ namespace Geotagger
             }
         }
 
+        public GPSTrackNearestPoint nearestPoint
+        {
+            get
+            {
+                return mNearestPoint;
+            }
+
+            set
+            {
+                mNearestPoint = value;
+            }
+        }
+
         //////////////////////////////////////////////////////////////////////
         // Private methods
         //////////////////////////////////////////////////////////////////////
@@ -229,11 +222,12 @@ namespace Geotagger
         // EXIF IDs
         private const int EXIF_DateTimeOriginal = 0x9003;
 
-        // Static
-        private static Hashtable sPhotoContainer = new Hashtable();
-
         // Instance
-        private Image       mThumbNail;
+        private Image                   mThumbNail;
+        private Object                  mMapMarkerObject;
+        private GPSTrackNearestPoint    mNearestPoint;
+
+        // Image properties (Should these be in their own structure or class)?
         private string      mFileName;
         private int         mWidth;
         private int         mHeight;
@@ -241,7 +235,5 @@ namespace Geotagger
         private float       mLatitude;
         private float       mLongitude;
         private float       mElevation;
-        private Object      mMapMarkerObject;
-
     }
 }

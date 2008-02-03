@@ -45,7 +45,10 @@
     <Compile Include="GPSTrack.cs" />
     <Compile Include="HttpServer.cs" />
     <Compile Include="MapInterface.cs" />
-    <Compile Include="PhotoData.cs" />
+    <Compile Include="PhotoCollection.cs" />
+    <Compile Include="PhotoData.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

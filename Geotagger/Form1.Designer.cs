@@ -72,6 +72,10 @@ namespace Geotagger
             this.toolStripLoadImages = new System.Windows.Forms.ToolStripButton();
             this.toolStripLoadGPX = new System.Windows.Forms.ToolStripButton();
             this.toolStripLocate = new System.Windows.Forms.ToolStripButton();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.useCalculatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usePreviousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.useNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -82,6 +86,7 @@ namespace Geotagger
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -247,6 +252,7 @@ namespace Geotagger
             this.listView1.AllowDrop = true;
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.name});
+            this.listView1.ContextMenuStrip = this.contextMenuStrip1;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView1.HideSelection = false;
@@ -325,6 +331,36 @@ namespace Geotagger
             this.toolStripLocate.Text = "Locate Photos";
             this.toolStripLocate.Click += new System.EventHandler(this.toolStripLocate_Click);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.useCalculatedToolStripMenuItem,
+            this.usePreviousToolStripMenuItem,
+            this.useNextToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 92);
+            // 
+            // useCalculatedToolStripMenuItem
+            // 
+            this.useCalculatedToolStripMenuItem.Name = "useCalculatedToolStripMenuItem";
+            this.useCalculatedToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.useCalculatedToolStripMenuItem.Text = "Use Calculated";
+            this.useCalculatedToolStripMenuItem.Click += new System.EventHandler(this.useCalculatedToolStripMenuItem_Click);
+            // 
+            // usePreviousToolStripMenuItem
+            // 
+            this.usePreviousToolStripMenuItem.Name = "usePreviousToolStripMenuItem";
+            this.usePreviousToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.usePreviousToolStripMenuItem.Text = "Use Previous";
+            this.usePreviousToolStripMenuItem.Click += new System.EventHandler(this.usePreviousToolStripMenuItem_Click);
+            // 
+            // useNextToolStripMenuItem
+            // 
+            this.useNextToolStripMenuItem.Name = "useNextToolStripMenuItem";
+            this.useNextToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.useNextToolStripMenuItem.Text = "Use Next";
+            this.useNextToolStripMenuItem.Click += new System.EventHandler(this.useNextToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -351,6 +387,7 @@ namespace Geotagger
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -379,6 +416,10 @@ namespace Geotagger
         private System.Windows.Forms.ToolStripButton toolStripLoadImages;
         private System.Windows.Forms.ToolStripButton toolStripLoadGPX;
         private System.Windows.Forms.ToolStripButton toolStripLocate;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem useCalculatedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem usePreviousToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem useNextToolStripMenuItem;
     }
 }
 

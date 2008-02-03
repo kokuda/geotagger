@@ -33,6 +33,22 @@ namespace Geotagger
         public float    mLon;
         public float    mEle;
         public DateTime mTime;
+        public int      mSegmentId;
+    }
+
+    public class GPSTrackNearestPoint
+    {
+        // Stores details about the nearest point in a GPS track
+        // to some other point in space.
+        // This must, at a minimum, include the two points in the track around
+        // the test point and the estimated location between them.
+        // It should also store details about the points, like whether they cross
+        // a tracklog boundary, as this can help determine which of the three
+        // points is most likely the correct one.
+        public GPSTrackPoint mCalculated;
+        public GPSTrackPoint mBefore;
+        public GPSTrackPoint mAfter;
+        public DateTime      mTime;
     }
 
     public class GPSTrackPointList : List<GPSTrackPoint> { }
@@ -52,6 +68,7 @@ namespace Geotagger
             XmlTextReader reader = new XmlTextReader(fileName);
             string parsingName = "";
             GPSTrackPoint parsingPoint = null;
+            int segmentId = 0;
 
             // Empty the list first.
             this.Clear();
@@ -70,6 +87,7 @@ namespace Geotagger
                             parsingPoint = new GPSTrackPoint();
                             parsingPoint.mLat = float.Parse(reader.GetAttribute("lat"));
                             parsingPoint.mLon = float.Parse(reader.GetAttribute("lon"));
+                            parsingPoint.mSegmentId = segmentId;
                         }
                         break;
 
@@ -98,23 +116,28 @@ namespace Geotagger
                             Add(parsingPoint);
                             parsingPoint = null;
                         }
+                        else if (reader.Name == "trkseg")
+                        {
+                            // Incement the segment number
+                            segmentId++;
+                        }
+
                         break;
                 }
             }
         }
 
         // Find the nearest track point to the given time.
-        public GPSTrackPoint FindNearest(DateTime time)
+        public GPSTrackNearestPoint FindNearest(DateTime time)
         {
-            // Initial version: Finds the first point in the track log that occured after the given time.
-            // This assumes that the track log is sorted by time.  What if the point is not found?
+            GPSTrackNearestPoint result = new GPSTrackNearestPoint();
 
+            // This assumes that the track log is sorted by time.  What if the point is not found?
             // TODO:
             // 1. Use a binary search since the list is sorted.
-            // 2. Find the point before and after the specified time and interpolate between them.
-            // 3. Return all three points (before, after, and "calculated") to be stored and shown to the user.
 
-            GPSTrackPoint foundPoint = this.Find(
+            // Find the next point after the given time.
+            int nextPoint = this.FindIndex(
                 delegate(GPSTrackPoint point)
                 {
                     // Return the first point that is greater than the given time.
@@ -123,7 +146,49 @@ namespace Geotagger
                 }
             );
 
-            return foundPoint;
+            // We will assume that nextPoint and nextPoint-1 are the two surrounding points.
+            // We must also handle the edge cases.
+            if (nextPoint < 0)
+            {
+                // Match not found so we are past the end of the point list.
+                result.mCalculated = this[this.Count - 1];
+                result.mBefore = result.mCalculated;
+                result.mAfter = null;
+                result.mTime = time;
+            }
+            else if (nextPoint == 0)
+            {
+                // Match found at first node.
+                result.mCalculated = this[0];
+                result.mBefore = null;
+                result.mAfter = result.mCalculated;
+                result.mTime = time;
+            }
+            else
+            {
+                // The point is in the middle somewhere
+                result.mBefore = this[nextPoint - 1];
+                result.mAfter = this[nextPoint];
+                result.mCalculated = new GPSTrackPoint();
+                {
+                    // Initialize the calculated point with an interpolant between mBefore and mAfter.
+                    // Calculate and normalize the point t between them.
+                    System.TimeSpan timeDiff = result.mAfter.mTime - result.mBefore.mTime;
+                    System.TimeSpan timeStep = time - result.mBefore.mTime;
+                    float interval = (float)timeStep.Ticks / (float)timeDiff.Ticks;
+                    result.mCalculated.mEle = result.mBefore.mEle + interval * (result.mAfter.mEle - result.mBefore.mEle);
+                    result.mCalculated.mLat = result.mBefore.mLat + interval * (result.mAfter.mLat - result.mBefore.mLat);
+                    result.mCalculated.mLon = result.mBefore.mLon + interval * (result.mAfter.mLon - result.mBefore.mLon);
+                    result.mCalculated.mTime = time;
+
+                    // Use the closest segment.
+                    result.mCalculated.mSegmentId = interval < 0.5 ? result.mBefore.mSegmentId : result.mAfter.mSegmentId;
+
+                }
+                result.mTime = time;
+            }
+
+            return result;
         }
     }
 }
