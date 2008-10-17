@@ -65,40 +65,62 @@ GTMInterface = new function()
 // ClearTrack: Removes all track points from the map.
 function GTMInterface_ClearTrack(lat, lng, htmltext)
 {
-	GTMInterface.mMapInterface.ClearTrack(lat,lng,htmltext);
+	if (GTMInterface.mMapInterface != null)
+	{
+		GTMInterface.mMapInterface.ClearTrack(lat,lng,htmltext);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // StartTrack: Indicates the begining of a track point list.
 function GTMInterface_StartTrack()
 {
-	GTMInterface.mMapInterface.StartTrack();
+	if (GTMInterface.mMapInterface != null)
+	{
+		GTMInterface.mMapInterface.StartTrack();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // AddTrackPoint: Adds a track point to the map.
 function GTMInterface_AddTrackPoint(lat, lng)
 {
-	GTMInterface.mMapInterface.AddTrackPoint(lat,lng);
+	if (GTMInterface.mMapInterface != null)
+	{
+		GTMInterface.mMapInterface.AddTrackPoint(lat,lng);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // EndTrack: Indicates the end of a track point list.
 function GTMInterface_EndTrack()
 {
-	GTMInterface.mMapInterface.EndTrack();
+	if (GTMInterface.mMapInterface != null)
+	{
+		GTMInterface.mMapInterface.EndTrack();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // CreateMarker: Create a marker on the map.
 function GTMInterface_CreateMarker(id, lat, lng)
 {
-	return GTMInterface.mMapInterface.CreateMarker(id, lat, lng);
+	if (GTMInterface.mMapInterface != null)
+	{
+		return GTMInterface.mMapInterface.CreateMarker(id, lat, lng);
+	}
+
+	return null;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // MoveMarker: Move an existing marker on the map.
 function GTMInterface_MoveMarker(marker, lat, lng)
 {
-	return GTMInterface.mMapInterface.MoveMarker(marker, lat, lng);
+	if ((GTMInterface.mMapInterface != null) && (marker != null))
+	{
+		return GTMInterface.mMapInterface.MoveMarker(marker, lat, lng);
+	}
+	
+	return null;
 }

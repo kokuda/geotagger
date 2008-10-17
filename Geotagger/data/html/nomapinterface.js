@@ -19,67 +19,55 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-// Object for interfacing the GeoTagger application with Google Maps.
+// Object for interfacing the GeoTagger application with no Maps (offline).
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-// Create Singleton GMapInterface as Google Map interface to geotagger.
-var GMapInterface = new function()
+// Create Singleton NoMapInterface offline interface to geotagger.
+var NoMapInterface = new function()
 {
 	//////////////////////////////////////////////////////////////////////////
 	// Public members
+	this.mMarkerList = [];
+	this.mPointList = [];
 	this.mMap = null;
 
+
 	//////////////////////////////////////////////////////////////////////////
-	// Check the availability of Google Maps (this will return false if the
-	// GMap2 interface did not load properly.
+	// Always available
 	this.IsAvailable = function()
 	{
-		return (typeof(GMap2) != "undefined");
+		return true;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// Initialize GMapInterface with the Google Map
+	// Initialize NoMapInterface (Does nothing, but exists to mirror the GMap
+	// interface.
 	this.Initialize = function(map)
 	{
-		mMap = new GMap2(map);
-		mMap.addControl(new GLargeMapControl());
-		mMap.addControl(new GMapTypeControl());
-		mMap.setCenter(new GLatLng(49.2, -123), 10, G_NORMAL_MAP);
-
-		// Initialize callback handlers for the Google Map
-		
-		// Handle the map click event and return it to GeoTagger.
-		GEvent.addListener(mMap, "click",
-			function(marker, point)
-			{
-				// If marker is null then this is a new point.
-				if (marker == null)
-				{
-					GTMInterface.SingleClick(point.lat(), point.lng());
-				}
-			}
-		);
+		// Create a basic offline view with no map.
+		this.mMap = map;
+		this.mMap.innerHTML = 'Offline<br /><br /><table><tr><td style="vertical-align:top"><div id="left"></div></td><td style="vertical-align:top"><div id="right"></div></td></tr></table>';
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 	// ClearTrack: Removes all track points from the map.
 	this.ClearTrack = function ()
 	{
-		mMap.clearOverlays();
+		this.mPointList = [];
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 	// StartTrack: Indicates the begining of a track point list.
 	this.StartTrack = function ()
 	{
-		var pointarray = [];
-
 		// Temporarily add a new function for adding the track points.
 		this.AddTrackPoint = function (lat, lng)
 		{
-			var latlng = new GLatLng(lat, lng);
-			pointarray.push(latlng)
+			var latlng = new Object;
+			latlng.lat = lat;
+			latlng.lng = lng;
+			this.mPointList.push(latlng);
 		}
 
 		this.EndTrack = function ()
@@ -88,8 +76,13 @@ var GMapInterface = new function()
 			this.AddTrackPoint = null;
 			this.EndTrack = null;
 
-			var polyline = new GPolyline(pointarray, "#ff0000", 5, 0.8);
-			mMap.addOverlay(polyline);
+			var html = "";
+			for(var i=0; i < this.mPointList.length; ++i)
+			{
+				html += "point " + i + " @ " + this.mPointList[i].lat + " / " + this.mPointList[i].lng + "<br />";
+			}
+			document.getElementById("left").innerHTML = html;
+
 		};
 	};
 
@@ -97,25 +90,15 @@ var GMapInterface = new function()
 	// CreateMarker: Create a marker on the map (probably for a photo
 	this.CreateMarker = function (id, lat, lng)
 	{
-		var marker = new GMarker(new GLatLng(lat, lng), {draggable: true, dragCrossMove: true, bouncy:true });
-		GEvent.addListener(marker, "click",
-			function()
-			{
-				GTMInterface.MarkerClick(id);
-				//marker.openInfoWindowHtml("test");
-			}
-		);
-		
-		GEvent.addListener(marker, "dragend",
-			function()
-			{
-				var latlng = marker.getLatLng();
-				GTMInterface.MarkerDrop(id, latlng.lat(), latlng.lng());
-			}
-		);
+		var marker = new Object;
+		marker.id = id;
+		marker.lat = lat;
+		marker.lng = lng;
 
-		mMap.addOverlay(marker);
-		
+		this.mMarkerList.push(marker);
+
+		document.getElementById("right").innerHTML += "Marker " + id + " @ " + lat + "/" + lng + "<br />";
+
 		return marker;
 	}
 
@@ -123,6 +106,7 @@ var GMapInterface = new function()
 	// MoveMarker: Moves a marker to a new location.
 	this.MoveMarker = function (marker, lat, lng)
 	{
-		marker.setLatLng(new GLatLng(lat, lng));
+		marker.lat = lat;
+		marker.lng = lng;
 	}
 }
