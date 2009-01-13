@@ -59,7 +59,7 @@ namespace Geotagger
 
         }
 
-        public void SetLocation(float lat, float lng, float ele)
+        public void SetLocation(decimal lat, decimal lng, decimal ele)
         {
             mLatitude = lat;
             mLongitude = lng;
@@ -98,7 +98,7 @@ namespace Geotagger
             }
         }
 
-        public float latitude
+        public decimal latitude
         {
             get
             {
@@ -106,7 +106,7 @@ namespace Geotagger
             }
         }
 
-        public float longitude
+        public decimal longitude
         {
             get
             {
@@ -114,7 +114,7 @@ namespace Geotagger
             }
         }
 
-        public float elevation
+        public decimal elevation
         {
             get
             {
@@ -232,8 +232,8 @@ namespace Geotagger
         private int         mWidth;
         private int         mHeight;
         private DateTime    mDateTime;
-        private float       mLatitude;
-        private float       mLongitude;
-        private float       mElevation;
+        private decimal mLatitude;
+        private decimal mLongitude;
+        private decimal mElevation;
     }
 }
