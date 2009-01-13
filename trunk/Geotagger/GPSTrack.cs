@@ -29,9 +29,9 @@ namespace Geotagger
 {
     public class GPSTrackPoint
     {
-        public float    mLat;
-        public float    mLon;
-        public float    mEle;
+        public decimal  mLat;
+        public decimal  mLon;
+        public decimal  mEle;
         public DateTime mTime;
         public int      mSegmentId;
     }
@@ -85,8 +85,8 @@ namespace Geotagger
                         {
                             // Starting a track point
                             parsingPoint = new GPSTrackPoint();
-                            parsingPoint.mLat = float.Parse(reader.GetAttribute("lat"));
-                            parsingPoint.mLon = float.Parse(reader.GetAttribute("lon"));
+                            parsingPoint.mLat = decimal.Parse(reader.GetAttribute("lat"));
+                            parsingPoint.mLon = decimal.Parse(reader.GetAttribute("lon"));
                             parsingPoint.mSegmentId = segmentId;
                         }
                         break;
@@ -98,7 +98,7 @@ namespace Geotagger
                             if (parsingName == "ele")
                             {
                                 // elevation
-                                parsingPoint.mEle = float.Parse(reader.Value);
+                                parsingPoint.mEle = decimal.Parse(reader.Value);
                             }
                             if (parsingName == "time")
                             {
@@ -175,14 +175,14 @@ namespace Geotagger
                     // Calculate and normalize the point t between them.
                     System.TimeSpan timeDiff = result.mAfter.mTime - result.mBefore.mTime;
                     System.TimeSpan timeStep = time - result.mBefore.mTime;
-                    float interval = (float)timeStep.Ticks / (float)timeDiff.Ticks;
+                    decimal interval = (decimal)timeStep.Ticks / (decimal)timeDiff.Ticks;
                     result.mCalculated.mEle = result.mBefore.mEle + interval * (result.mAfter.mEle - result.mBefore.mEle);
                     result.mCalculated.mLat = result.mBefore.mLat + interval * (result.mAfter.mLat - result.mBefore.mLat);
                     result.mCalculated.mLon = result.mBefore.mLon + interval * (result.mAfter.mLon - result.mBefore.mLon);
                     result.mCalculated.mTime = time;
 
                     // Use the closest segment.
-                    result.mCalculated.mSegmentId = interval < 0.5 ? result.mBefore.mSegmentId : result.mAfter.mSegmentId;
+                    result.mCalculated.mSegmentId = interval < 0.5m ? result.mBefore.mSegmentId : result.mAfter.mSegmentId;
 
                 }
                 result.mTime = time;

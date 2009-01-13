@@ -44,7 +44,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -57,6 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="exifheader\exifdirectory.cs" />
+    <Compile Include="exifheader\exifformat.cs" />
+    <Compile Include="exifheader\gpslocation.cs" />
+    <Compile Include="exifheader\memoperations.cs" />
+    <Compile Include="exifheader\rational.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="exifheader\writer.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

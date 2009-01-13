@@ -87,7 +87,7 @@ namespace Geotagger
             listView1.Items[photoIndex].Selected = true;
         }
 
-        public void Map_MarkerDrop(int photoIndex, float lat, float lng)
+        public void Map_MarkerDrop(int photoIndex, decimal lat, decimal lng)
         {
             Debug.WriteLine("MarkerDrop(" + photoIndex + "," + lat + "," + lng + ")");
             PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[photoIndex].ImageKey);
@@ -150,7 +150,8 @@ namespace Geotagger
                         {
                             PhotoData data = mPhotoCollection.AddPhoto(file);
                             imageListSmall.Images.Add(file, data.thumbnail);
-                            listView1.Items.Add(file, Path.GetFileName(file), file);
+                            ListViewItem item = listView1.Items.Add(file, Path.GetFileName(file), file);
+                            item.Selected = true;
                         }
                     }
                     catch (System.Security.SecurityException ex)
@@ -211,7 +212,8 @@ namespace Geotagger
                 PhotoData photo = mPhotoCollection.GetPhoto(listView1.Items[index].ImageKey);
 
                 // Find the nearest point
-                GPSTrackNearestPoint location = mGPSTrack.FindNearest(photo.dateTime);
+                DateTime realTime = photo.dateTime.AddHours(this.trackBarTimeOffset.Value);
+                GPSTrackNearestPoint location = mGPSTrack.FindNearest(realTime);
                 Debug.WriteLine("Locating " + photo.dateTime.ToString() + " at " + location.mCalculated.mLat + "," + location.mCalculated.mLon);
 
                 // Store the calculated location.
@@ -285,6 +287,35 @@ namespace Geotagger
                     GPSTrackPoint location = photo.nearestPoint.mAfter;
                     photo.SetLocation(location.mLat, location.mLon, location.mEle);
                     mMapInterface.MoveMarker(photo.markerObject, location);
+                }
+            }
+        }
+
+        private void trackBarTimeOffset_ValueChanged(object sender, EventArgs e)
+        {
+            int offset = this.trackBarTimeOffset.Value;
+            this.textBoxTimeOffset.Text = String.Format("{0} hour{1}", offset, offset==1 ? "" : "s");
+        }
+
+        private void toolStripButtonSave_Click(object sender, EventArgs e)
+        {
+            // Save the previously located photos.
+            // Maybe we can group them into two lists, those with data and those without?
+            // Maybe just a flag in the list indicating which ones have data that needs to be saved.
+            // Maybe we save whichever are highlighted.
+
+            // Use one Writer repeatedly, resetting the location with each photo.
+            ExifHeader.JpegWriter writer = new ExifHeader.JpegWriter();
+
+            foreach (ListViewItem i in listView1.Items)
+            {
+                // Get the photo
+                string filename = i.ImageKey;
+                PhotoData photo = mPhotoCollection.GetPhoto(filename);
+                if (photo.nearestPoint != null)
+                {
+                    writer.gpsLocation = new ExifHeader.GpsLocation(photo.latitude, photo.longitude, photo.height);
+                    writer.WriteDataToFile(filename);
                 }
             }
         }

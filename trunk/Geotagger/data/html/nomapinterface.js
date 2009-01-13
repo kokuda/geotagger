@@ -108,5 +108,6 @@ var NoMapInterface = new function()
 	{
 		marker.lat = lat;
 		marker.lng = lng;
+		document.getElementById("right").innerHTML += "Marker " + marker.id + " @ " + lat + "/" + lng + "<br />";
 	}
 }

@@ -47,7 +47,7 @@ namespace Geotagger
             mForm.Map_MarkerClick(index);
         }
 
-        public void MarkerDrop(int index, float lat, float lng)
+        public void MarkerDrop(int index, decimal lat, decimal lng)
         {
             mForm.Map_MarkerDrop(index, lat, lng);
         }

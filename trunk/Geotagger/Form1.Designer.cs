@@ -64,18 +64,22 @@ namespace Geotagger
             this.labelLocation = new System.Windows.Forms.Label();
             this.labelTime = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.textBoxTimeOffset = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.trackBarTimeOffset = new System.Windows.Forms.TrackBar();
             this.listView1 = new System.Windows.Forms.ListView();
             this.name = new System.Windows.Forms.ColumnHeader();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.useCalculatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usePreviousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.useNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListSmall = new System.Windows.Forms.ImageList(this.components);
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLoadImages = new System.Windows.Forms.ToolStripButton();
             this.toolStripLoadGPX = new System.Windows.Forms.ToolStripButton();
             this.toolStripLocate = new System.Windows.Forms.ToolStripButton();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.useCalculatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.usePreviousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.useNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButtonSave = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -85,8 +89,9 @@ namespace Geotagger
             this.splitContainer2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarTimeOffset)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -165,6 +170,9 @@ namespace Geotagger
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.Controls.Add(this.textBoxTimeOffset);
+            this.splitContainer2.Panel2.Controls.Add(this.label1);
+            this.splitContainer2.Panel2.Controls.Add(this.trackBarTimeOffset);
             this.splitContainer2.Panel2.Controls.Add(this.listView1);
             this.splitContainer2.Size = new System.Drawing.Size(213, 430);
             this.splitContainer2.SplitterDistance = 206;
@@ -247,19 +255,55 @@ namespace Geotagger
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
+            // textBoxTimeOffset
+            // 
+            this.textBoxTimeOffset.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxTimeOffset.Location = new System.Drawing.Point(153, 197);
+            this.textBoxTimeOffset.Name = "textBoxTimeOffset";
+            this.textBoxTimeOffset.ReadOnly = true;
+            this.textBoxTimeOffset.Size = new System.Drawing.Size(58, 20);
+            this.textBoxTimeOffset.TabIndex = 1;
+            this.textBoxTimeOffset.Text = "0 hours";
+            this.textBoxTimeOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(149, 172);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(61, 13);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Time Offset";
+            // 
+            // trackBarTimeOffset
+            // 
+            this.trackBarTimeOffset.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.trackBarTimeOffset.Location = new System.Drawing.Point(3, 172);
+            this.trackBarTimeOffset.Minimum = -10;
+            this.trackBarTimeOffset.Name = "trackBarTimeOffset";
+            this.trackBarTimeOffset.Size = new System.Drawing.Size(144, 45);
+            this.trackBarTimeOffset.TabIndex = 4;
+            this.trackBarTimeOffset.ValueChanged += new System.EventHandler(this.trackBarTimeOffset_ValueChanged);
+            // 
             // listView1
             // 
             this.listView1.AllowDrop = true;
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.name});
             this.listView1.ContextMenuStrip = this.contextMenuStrip1;
-            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView1.HideSelection = false;
             this.listView1.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(213, 220);
+            this.listView1.Size = new System.Drawing.Size(213, 166);
             this.listView1.SmallImageList = this.imageListSmall;
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -270,6 +314,36 @@ namespace Geotagger
             // 
             this.name.Text = "File Name";
             this.name.Width = 112;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.useCalculatedToolStripMenuItem,
+            this.usePreviousToolStripMenuItem,
+            this.useNextToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 70);
+            // 
+            // useCalculatedToolStripMenuItem
+            // 
+            this.useCalculatedToolStripMenuItem.Name = "useCalculatedToolStripMenuItem";
+            this.useCalculatedToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.useCalculatedToolStripMenuItem.Text = "Use Calculated";
+            this.useCalculatedToolStripMenuItem.Click += new System.EventHandler(this.useCalculatedToolStripMenuItem_Click);
+            // 
+            // usePreviousToolStripMenuItem
+            // 
+            this.usePreviousToolStripMenuItem.Name = "usePreviousToolStripMenuItem";
+            this.usePreviousToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.usePreviousToolStripMenuItem.Text = "Use Previous";
+            this.usePreviousToolStripMenuItem.Click += new System.EventHandler(this.usePreviousToolStripMenuItem_Click);
+            // 
+            // useNextToolStripMenuItem
+            // 
+            this.useNextToolStripMenuItem.Name = "useNextToolStripMenuItem";
+            this.useNextToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.useNextToolStripMenuItem.Text = "Use Next";
+            this.useNextToolStripMenuItem.Click += new System.EventHandler(this.useNextToolStripMenuItem_Click);
             // 
             // imageListSmall
             // 
@@ -294,7 +368,8 @@ namespace Geotagger
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLoadImages,
             this.toolStripLoadGPX,
-            this.toolStripLocate});
+            this.toolStripLocate,
+            this.toolStripButtonSave});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(726, 25);
@@ -331,35 +406,15 @@ namespace Geotagger
             this.toolStripLocate.Text = "Locate Photos";
             this.toolStripLocate.Click += new System.EventHandler(this.toolStripLocate_Click);
             // 
-            // contextMenuStrip1
+            // toolStripButtonSave
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.useCalculatedToolStripMenuItem,
-            this.usePreviousToolStripMenuItem,
-            this.useNextToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(157, 92);
-            // 
-            // useCalculatedToolStripMenuItem
-            // 
-            this.useCalculatedToolStripMenuItem.Name = "useCalculatedToolStripMenuItem";
-            this.useCalculatedToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.useCalculatedToolStripMenuItem.Text = "Use Calculated";
-            this.useCalculatedToolStripMenuItem.Click += new System.EventHandler(this.useCalculatedToolStripMenuItem_Click);
-            // 
-            // usePreviousToolStripMenuItem
-            // 
-            this.usePreviousToolStripMenuItem.Name = "usePreviousToolStripMenuItem";
-            this.usePreviousToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.usePreviousToolStripMenuItem.Text = "Use Previous";
-            this.usePreviousToolStripMenuItem.Click += new System.EventHandler(this.usePreviousToolStripMenuItem_Click);
-            // 
-            // useNextToolStripMenuItem
-            // 
-            this.useNextToolStripMenuItem.Name = "useNextToolStripMenuItem";
-            this.useNextToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.useNextToolStripMenuItem.Text = "Use Next";
-            this.useNextToolStripMenuItem.Click += new System.EventHandler(this.useNextToolStripMenuItem_Click);
+            this.toolStripButtonSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonSave.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonSave.Image")));
+            this.toolStripButtonSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSave.Name = "toolStripButtonSave";
+            this.toolStripButtonSave.Size = new System.Drawing.Size(35, 22);
+            this.toolStripButtonSave.Text = "Save";
+            this.toolStripButtonSave.Click += new System.EventHandler(this.toolStripButtonSave_Click);
             // 
             // Form1
             // 
@@ -372,8 +427,8 @@ namespace Geotagger
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Geotagger";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -381,13 +436,15 @@ namespace Geotagger
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.Panel2.PerformLayout();
             this.splitContainer2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarTimeOffset)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -420,6 +477,10 @@ namespace Geotagger
         private System.Windows.Forms.ToolStripMenuItem useCalculatedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usePreviousToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem useNextToolStripMenuItem;
+        private System.Windows.Forms.TrackBar trackBarTimeOffset;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBoxTimeOffset;
+        private System.Windows.Forms.ToolStripButton toolStripButtonSave;
     }
 }
 
