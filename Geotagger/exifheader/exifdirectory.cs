@@ -45,6 +45,13 @@ namespace ExifHeader
             return (uint)data.Length;
         }
 
+        public uint AlignDirectoryOffset(uint dataOffset)
+        {
+            // Picasa seems to align each directory to 4 bytes.
+            // I'm not sure if this is needed, but it shouldn't hurt.
+            return (dataOffset + 3) & ~(uint)3;
+        }
+
         public byte[] BuildData(MemOperations memOps, uint offsetBase)
         {
             uint offset = 0;
@@ -79,54 +86,53 @@ namespace ExifHeader
                 offset = WriteUInt16(data, offset, memOps, (uint)e.format);
                 offset = WriteUInt32(data, offset, memOps, e.components);
 
-                // If the data size is <= 4 then we write it out next,
-                // otherwise we write out an offset to the data.
-                if (e.size > 4)
-                {
-                    // We will put the data at the end of the elements
-                    // so just write out the offset here.
-                    offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
-
-                    // record this for later so we can write out the data.
-                    offsetList[i] = dataOffset;
-
-                    // Update the data offset to point past that data.
-                    dataOffset += e.size;
-                }
-                else
-                {
-                    // Store the offset as 0 so we don't try to write out the data.
-                    offsetList[i] = 0;
-
-                    //outfile.Write(e.data, 0, (int)e.size);
-
-                    // Don't assume that e.data.Length is the same as e.size.
-                    // For EXIF_OFFSET elements, the data is an offset, so the size is 4,
-                    // but we use e.data to store the actual data being referenced.
-                    //e.data.CopyTo(data, offset);
-                    Array.Copy(e.data, 0, data, offset, e.size);
-
-                    offset += 4;
-                }
 
                 switch (e.tag)
                 {
                     case Tag.EXIF_OFFSET:
                     case Tag.INTEROP_OFFSET:
                     case Tag.GPSINFO:
+                    case Tag.MAKER_NOTE:
+
+                        dataOffset = AlignDirectoryOffset(dataOffset);
 
                         e.data = e.subdir.BuildData(memOps, offsetBase + dataOffset);
-
-                        // Even though this was a 4 byte element, those 4 bytes are the
-                        // offset of the data, which we should output now.
-                        // Go back 4 bytes and overwrite the previous data.
-                        offset = WriteUInt32(data, offset - 4, memOps, offsetBase + dataOffset);
+                        offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
                         offsetList[i] = dataOffset;
                         dataOffset += (uint)e.data.Length;
                         this[i] = e;
                         break;
 
                     default:
+                        // If the data size is <= 4 then we write it out next,
+                        // otherwise we write out an offset to the data.
+                        if (e.size > 4)
+                        {
+                            // We will put the data at the end of the elements
+                            // so just write out the offset here.
+                            offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
+
+                            // record this for later so we can write out the data.
+                            offsetList[i] = dataOffset;
+
+                            // Update the data offset to point past that data.
+                            dataOffset += e.size;
+                        }
+                        else
+                        {
+                            // Store the offset as 0 so we don't try to write out the data.
+                            offsetList[i] = 0;
+
+                            //outfile.Write(e.data, 0, (int)e.size);
+
+                            // Don't assume that e.data.Length is the same as e.size.
+                            // For EXIF_OFFSET elements, the data is an offset, so the size is 4,
+                            // but we use e.data to store the actual data being referenced.
+                            //e.data.CopyTo(data, offset);
+                            Array.Copy(e.data, 0, data, offset, e.size);
+
+                            offset += 4;
+                        }
                         break;
                 }
             }
@@ -137,6 +143,8 @@ namespace ExifHeader
             if (this[this.Count - 1].tag == Tag.EXIF_OFFSET_APPENDED)
             {
                 ExifDirectory appendedDir = this[this.Count - 1].subdir;
+
+                dataOffset = AlignDirectoryOffset(dataOffset);
 
                 // Build a directory entry, but we will append it to the directory
                 // instead of including it in the directory
@@ -151,7 +159,7 @@ namespace ExifHeader
             }
 
             // Ensure that there is enough space for all the output
-            uint dataSize = dataOffset + 4;
+            uint dataSize = dataOffset;
             if (dataSize > data.Length)
             {
                 byte[] newdata = new byte[dataSize];
@@ -188,17 +196,5 @@ namespace ExifHeader
             memOps.SetUInt16(data, offset, value);
             return offset + 2;
         }
-
-        public void SetAppendedDirectory(ExifDirectory dir)
-        {
-            mAppendedDirectory = dir;
-        }
-
-        public ExifDirectory GetAppendedDirectory()
-        {
-            return mAppendedDirectory;
-        }
-
-        private ExifDirectory mAppendedDirectory;
     }
 }

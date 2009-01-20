@@ -34,7 +34,7 @@ namespace ExifHeader
         }
 
         // Use the data collected in the ExifDirectory to extract the thumbnail, if available.
-        public byte[] GetThumbnail(ExifDirectory dir, byte[] exif)
+        public byte[] GetThumbnail(ExifDirectory dir, byte[] exif, uint firstOffset)
         {
             byte[] thumbnail = null;
             uint thumbnailSize = 0;
@@ -60,7 +60,7 @@ namespace ExifHeader
                         // directories, then we won't find it.  Let's hope that doesn't happen.
                         if (e.subdir != null)
                         {
-                            thumbnail = GetThumbnail(e.subdir, exif);
+                            thumbnail = GetThumbnail(e.subdir, exif, firstOffset);
                             if (thumbnail != null)
                             {
                                 break;
@@ -74,12 +74,12 @@ namespace ExifHeader
             if (thumbnailSize > 0 && thumbnailOffset > 0)
             {
                 thumbnail = new byte[thumbnailSize];
-                CopyBytes(thumbnail, thumbnailSize, exif, (int)thumbnailOffset);
+                CopyBytes(thumbnail, thumbnailSize, exif, (int)(thumbnailOffset + firstOffset));
                 Console.WriteLine("Thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
             }
             else
             {
-                Console.WriteLine("No thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
+                //Console.WriteLine("No thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
             }
 
             return thumbnail;
@@ -137,6 +137,20 @@ namespace ExifHeader
             }
         }
 
+        public void WriteStream(Stream stream, string filename)
+        {
+            byte[] outdata = new byte[stream.Length];
+            stream.Seek(0, SeekOrigin.Begin);
+            stream.Read(outdata, 0, (int)stream.Length);
+            File.WriteAllBytes(filename, outdata);
+        }
+
+        private void UpdateGPSData(ExifDirectory dir)
+        {
+            // 1. Remove the GPS data from the ExifDirectory.
+            // 2. Insert new GPS data.
+        }
+
         public void WriteDataToFile(string filename)
         {
             if (mGpsData.HasValue)
@@ -153,13 +167,27 @@ namespace ExifHeader
             // Scan through the file looking for existing data
             // If data does not exist then add it to the file and update the headers
             // If it does exist, then replace it and update the headers.
-            bool result = ProcessJpegSections(outfile, infile);
+            bool result = ProcessJpegSections(outfile, infile, UpdateGPSData);
 
             if (result)
             {
 #if DEBUG
-                File.WriteAllBytes("test.jpg", outfile.GetBuffer());
-                DebugCompareStreams(outfile, infile);
+                if (DebugCompareStreams(outfile, infile))
+                {
+                    Console.WriteLine("Output matches {0}", filename);
+                }
+                WriteStream(outfile, "test.jpg");
+
+                // Run the test again, but with our own file to ensure that
+                // we can read it and we write it out again the same.
+                outfile.Seek(0, SeekOrigin.Begin);
+                MemoryStream test2 = new MemoryStream();
+                ProcessJpegSections(test2, outfile, UpdateGPSData);
+                if (DebugCompareStreams(test2, outfile))
+                {
+                    Console.WriteLine("test1 matches test2");
+                }
+                WriteStream(test2, "test2.jpg");
 #endif
             }
 
@@ -171,7 +199,7 @@ namespace ExifHeader
         // On error, the contents of outfile may be invalid.
         // infile will not be modified, except for the current position
         // of the stream.
-        private bool ProcessJpegSections(Stream outfile, Stream infile)
+        public bool ProcessJpegSections(Stream outfile, Stream infile, Action<ExifDirectory> exifAction)
         {
             if (ReadThroughByte(outfile, infile) != 0xff || ReadThroughByte(outfile, infile) != M_SOI)
             {
@@ -330,26 +358,19 @@ namespace ExifHeader
 
             if (dir != null)
             {
-                // If we succeeded in parsing the Exif directory, then let's write out all the data.
+                // If we succeeded in parsing the Exif directory,
+                // then let's write out all the data.
 
                 // We need to...
-                // 1. Create a new GPS dir entry with the new data.
-                // 2. Overwrite the offset of the entry to point to our new data.
-                // 3. Write the new GPS entry at the end of the exif data (alignment?)
-                // 4. Update the exif size.
-                // 5. Write the exif data out to the file and dump the rest of the file.
-                //
-                // TODO: Fixup the exif data instead of simply skipping the old data.
-                // There is more room for error in that situation, but it would be more
-                // "correct".  We could collect each entry into a data structure and,
-                // after fixing up the GPS data, write them all out to the file.
+                // 1. Remove the GPS data from the ExifDirectory.
+                // 2. Insert new GPS data.
 
                 // Copy the exif header to the output stream up to firstOffset
                 byte[] head = new byte[8+firstOffset];
                 CopyBytes(head, (uint)(8 + firstOffset), exif, 0);
 
                 // Process the directory and extract the thumbnail.
-                byte[] thumbnail = GetThumbnail(dir, exif);
+                byte[] thumbnail = GetThumbnail(dir, exif, (uint)firstOffset);
 
                 // Convert the ExifDirectory back into RAW exif data.
                 byte[] data = dir.BuildData(mMemOps, (uint)firstOffset);
@@ -382,8 +403,8 @@ namespace ExifHeader
         {
             if (format != ExifFormat.EXIF_ULONG)
             {
-                Console.WriteLine("ERROR: offset is invalid");
-                return null;
+                Console.WriteLine("WARNING: subdir format is unusual {0}", format);
+//                return null;
             }
             // Should this be a UInt?  Should we just use uint for everything?
             int subdirStart = offsetBase + mMemOps.GetInt32(exif, offset + 8);
@@ -503,6 +524,21 @@ namespace ExifHeader
                         }
                         break;
 
+                    case Tag.MAKER_NOTE:
+                        {
+                            Console.WriteLine("Found MAKER_NOTE Tag");
+                            ExifDirectory dir = ProcessExifSubDirTag(outfile, exif, new ExifFormat(format), offsetBase, offset, length, nestingLevel);
+                            if (dir == null)
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                entry.subdir = dir;
+                            }
+                        }
+                        break;
+
                     default:
                         // We don't care about any entries other than the GPS info
                         break;
@@ -590,8 +626,10 @@ namespace ExifHeader
         }
 
 #if DEBUG
-        void DebugCompareStreams(Stream s1, Stream s2)
+        public bool DebugCompareStreams(Stream s1, Stream s2)
         {
+            bool result = false;
+
             s1.Seek(0, SeekOrigin.Begin);
             s2.Seek(0, SeekOrigin.Begin);
 
@@ -609,13 +647,76 @@ namespace ExifHeader
                 b1 = s1.ReadByte();
                 b2 = s2.ReadByte();
             }
-            while ((b1 == b2) && (b1 != -1));
+            while ((b1 == b2) && (b1 != -1) && (b2 != -1));
 
             if (b1 != b2)
             {
                 Console.WriteLine("ERROR: DebugCompareStreams - Streams do not match!");
             }
+            else
+            {
+                Console.WriteLine("DebugComareStreams - Streams are identical");
+                result = true;
+            }
+
+            return result;
         }
+
+        private void LaunchCompare(string file1, string file2)
+        {
+            System.Diagnostics.ProcessStartInfo info = new System.Diagnostics.ProcessStartInfo();
+            info.FileName = "comparejpeg.bat";
+            info.Arguments = "\"" + file1 + "\"" + " " + "\"" + file2 + "\"";
+            info.UseShellExecute = true;
+            System.Diagnostics.Process.Start(info);
+        }
+
+        public void UnitTest(string filename)
+        {
+            // Open the file for reading
+            FileStream infile = new FileStream(filename, FileMode.Open, FileAccess.Read);
+
+            // Create the output stream - memory backed, not file.
+            MemoryStream outfile = new MemoryStream();
+
+            // Scan through the file looking for existing data
+            // If data does not exist then add it to the file and update the headers
+            // If it does exist, then replace it and update the headers.
+            bool result = ProcessJpegSections(outfile, infile, null);
+
+            if (result)
+            {
+                if (DebugCompareStreams(outfile, infile))
+                {
+                    Console.WriteLine("Output matches {0}", filename);
+                }
+                else
+                {
+                    // The files are different so we should compare them
+                    WriteStream(outfile, "test.jpg");
+                    LaunchCompare(filename, "test.jpg");
+                }
+
+                // Run the test again, but with our own file to ensure that
+                // we can read it and we write it out again the same.
+                outfile.Seek(0, SeekOrigin.Begin);
+                MemoryStream test2 = new MemoryStream();
+                ProcessJpegSections(test2, outfile, null);
+                if (DebugCompareStreams(test2, outfile))
+                {
+                    Console.WriteLine("test1 matches test2");
+                }
+                else
+                {
+                    // The files are different so we should compare them
+                    WriteStream(outfile, "test2.jpg");
+                    LaunchCompare("test1.jpg", "test2.jpg");
+                }
+            }
+
+            outfile.Close();
+        }
+
 #endif
 
         // Value is nullable and initializes to null.

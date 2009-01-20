@@ -319,5 +319,32 @@ namespace Geotagger
                 }
             }
         }
+
+        private void testExifWritingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Run a series of tests of a list of images to help
+            // test the JPEG Exif processing code
+
+            // Open a file dialog to select the images.
+            OpenFileDialog dialog1 = new OpenFileDialog();
+
+            dialog1.Multiselect = true;
+            dialog1.Title = "Browse to find the images";
+            dialog1.Filter =
+                "Images (*.JPG)|*.JPG|" +
+                "All files (*.*)|*.*";
+            dialog1.RestoreDirectory = true;
+
+            if (dialog1.ShowDialog() == DialogResult.OK)
+            {
+                ExifHeader.JpegWriter writer = new ExifHeader.JpegWriter();
+
+                // Read the files
+                foreach (String file in dialog1.FileNames)
+                {
+                    writer.UnitTest(file);
+                }
+            }
+        }
     }
 }
