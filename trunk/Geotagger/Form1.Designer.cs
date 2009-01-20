@@ -80,6 +80,8 @@ namespace Geotagger
             this.toolStripLoadGPX = new System.Windows.Forms.ToolStripButton();
             this.toolStripLocate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonSave = new System.Windows.Forms.ToolStripButton();
+            this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.testExifWritingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -97,7 +99,8 @@ namespace Geotagger
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.debugToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(726, 24);
@@ -416,6 +419,21 @@ namespace Geotagger
             this.toolStripButtonSave.Text = "Save";
             this.toolStripButtonSave.Click += new System.EventHandler(this.toolStripButtonSave_Click);
             // 
+            // debugToolStripMenuItem
+            // 
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.testExifWritingToolStripMenuItem});
+            this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
+            this.debugToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.debugToolStripMenuItem.Text = "Test";
+            // 
+            // testExifWritingToolStripMenuItem
+            // 
+            this.testExifWritingToolStripMenuItem.Name = "testExifWritingToolStripMenuItem";
+            this.testExifWritingToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.testExifWritingToolStripMenuItem.Text = "Test Exif Writing";
+            this.testExifWritingToolStripMenuItem.Click += new System.EventHandler(this.testExifWritingToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -481,6 +499,8 @@ namespace Geotagger
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxTimeOffset;
         private System.Windows.Forms.ToolStripButton toolStripButtonSave;
+        private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem testExifWritingToolStripMenuItem;
     }
 }
 
