@@ -25,181 +25,15 @@ using System.IO;
 
 namespace ExifHeader
 {
-    // Losslessly update the exif data in a JPG file.
-    class JpegWriter
+    class JpegProcessor
     {
-        public GpsLocation gpsLocation
-        {
-            set { mGpsData = value; }
-        }
-
-        // Use the data collected in the ExifDirectory to extract the thumbnail, if available.
-        public byte[] GetThumbnail(ExifDirectory dir, byte[] exif, uint firstOffset)
-        {
-            byte[] thumbnail = null;
-            uint thumbnailSize = 0;
-            uint thumbnailOffset = 0;
-
-            // Recursively search through the ExifDirectory for the thumbnail offset and length
-            // If they are found then return a byte array containing the thumbnail.
-            foreach (ExifEntry e in dir)
-            {
-                switch (e.tag)
-                {
-                    case Tag.THUMBNAIL_OFFSET:
-                        thumbnailOffset = mMemOps.GetUInt32(e.data, 0);
-                        break;
-
-                    case Tag.THUMBNAIL_LENGTH:
-                        thumbnailSize = mMemOps.GetUInt32(e.data, 0);
-                        break;
-
-                    default:
-                        // If this is a subdir, then search that for the thumbnail.
-                        // In theory, if the thumbnail size and offset are in different
-                        // directories, then we won't find it.  Let's hope that doesn't happen.
-                        if (e.subdir != null)
-                        {
-                            thumbnail = GetThumbnail(e.subdir, exif, firstOffset);
-                            if (thumbnail != null)
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                }
-            }
-
-            // Store the thumbnail.
-            if (thumbnailSize > 0 && thumbnailOffset > 0)
-            {
-                thumbnail = new byte[thumbnailSize];
-                CopyBytes(thumbnail, thumbnailSize, exif, (int)(thumbnailOffset + firstOffset));
-                Console.WriteLine("Thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
-            }
-            else
-            {
-                //Console.WriteLine("No thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
-            }
-
-            return thumbnail;
-        }
-
-        public void UpdateThumbnail(ExifDirectory dir, byte[] thumbnail, uint thumbnailOffset)
-        {
-            // Recursively search through the ExifDirectory for the thumbnail offset and length
-            // If they are found then return a byte array containing the thumbnail.
-            foreach (ExifEntry e in dir)
-            {
-                switch (e.tag)
-                {
-                    case Tag.THUMBNAIL_OFFSET:
-                        mMemOps.SetUInt32(e.data, 0, thumbnailOffset);
-                        break;
-
-                    case Tag.THUMBNAIL_LENGTH:
-                        // We don't need to write the length since it should be the same.
-                        // In fact, this would be a good place to confirm that
-                        if (mMemOps.GetUInt32(e.data, 0) != (uint)thumbnail.Length)
-                        {
-                            throw new Exception("The thumbnail length is invalid");
-                        }
-                        //mMemOps.SetUInt32(e.data, 0, (uint)thumbnail.Length);
-                        break;
-
-                    default:
-                        if (e.subdir != null)
-                        {
-                            UpdateThumbnail(e.subdir, thumbnail, thumbnailOffset);
-                        }
-                        break;
-                }
-            }
-        }
-
-        // Postprocess the data, update the thumbnail location, and write it to the stream.
-        public void OutputExif(Stream outfile, byte[] head, byte[] data, byte[] thumbnail)
-        {
-            uint thumbnailLength = thumbnail == null ? 0 : (uint)thumbnail.Length;
-            uint exiflength = (uint)(head.Length + data.Length + thumbnailLength);
-
-            // Update the exif size in the head.
-            uint lh = exiflength >> 8 & 0xFF;
-            uint ll = exiflength & 0xFF;
-            head[0] = (byte)lh;
-            head[1] = (byte)ll;
-
-            outfile.Write(head, 0, head.Length);
-            outfile.Write(data, 0, data.Length);
-            if (thumbnailLength > 0)
-            {
-                outfile.Write(thumbnail, 0, thumbnail.Length);
-            }
-        }
-
-        public void WriteStream(Stream stream, string filename)
-        {
-            byte[] outdata = new byte[stream.Length];
-            stream.Seek(0, SeekOrigin.Begin);
-            stream.Read(outdata, 0, (int)stream.Length);
-            File.WriteAllBytes(filename, outdata);
-        }
-
-        private void UpdateGPSData(ExifDirectory dir)
-        {
-            // 1. Remove the GPS data from the ExifDirectory.
-            // 2. Insert new GPS data.
-        }
-
-        public void WriteDataToFile(string filename)
-        {
-            if (mGpsData.HasValue)
-            {
-                Console.WriteLine("Writing GPS data to {0}", filename);
-            }
-
-            // Open the file for reading
-            FileStream infile = new FileStream(filename, FileMode.Open, FileAccess.Read);
-
-            // Create the output stream - memory backed, not file.
-            MemoryStream outfile = new MemoryStream();
-
-            // Scan through the file looking for existing data
-            // If data does not exist then add it to the file and update the headers
-            // If it does exist, then replace it and update the headers.
-            bool result = ProcessJpegSections(outfile, infile, UpdateGPSData);
-
-            if (result)
-            {
-#if DEBUG
-                if (DebugCompareStreams(outfile, infile))
-                {
-                    Console.WriteLine("Output matches {0}", filename);
-                }
-                WriteStream(outfile, "test.jpg");
-
-                // Run the test again, but with our own file to ensure that
-                // we can read it and we write it out again the same.
-                outfile.Seek(0, SeekOrigin.Begin);
-                MemoryStream test2 = new MemoryStream();
-                ProcessJpegSections(test2, outfile, UpdateGPSData);
-                if (DebugCompareStreams(test2, outfile))
-                {
-                    Console.WriteLine("test1 matches test2");
-                }
-                WriteStream(test2, "test2.jpg");
-#endif
-            }
-
-            outfile.Close();
-        }
-
         // Process infile, writing the output to outfile.
+        // Runs the exifAction on the ExifDirectory before it is output.
         // Returns false if there were any errors.
         // On error, the contents of outfile may be invalid.
         // infile will not be modified, except for the current position
         // of the stream.
-        public bool ProcessJpegSections(Stream outfile, Stream infile, Action<ExifDirectory> exifAction)
+        public bool ProcessJpegFile(Stream outfile, Stream infile, Action<ExifDirectory> exifAction)
         {
             if (ReadThroughByte(outfile, infile) != 0xff || ReadThroughByte(outfile, infile) != M_SOI)
             {
@@ -247,8 +81,8 @@ namespace ExifHeader
                 sectionData[1] = ll;
 
                 // Read the rest of the section after the length
-                int got = infile.Read(sectionData, 2, length-2);
-                if (got != length-2)
+                int got = infile.Read(sectionData, 2, length - 2);
+                if (got != length - 2)
                 {
                     Console.WriteLine("ERROR: Premature end of file?");
                     break;
@@ -273,7 +107,7 @@ namespace ExifHeader
 
                         if (Encoding.ASCII.GetString(sectionData, 2, 4).CompareTo("Exif") == 0)
                         {
-                            if (!ProcessExif(outfile, sectionData))
+                            if (!ProcessExif(outfile, sectionData, exifAction))
                             {
                                 done = true;
                                 result = false;
@@ -304,7 +138,31 @@ namespace ExifHeader
             return result;
         }
 
-        private bool ProcessExif(Stream outfile, byte[] exif)
+        ///////////////////////////////////////////////////////////////////////
+
+        // Postprocess the data, update the thumbnail location, and write it to the stream.
+        private void OutputExif(Stream outfile, byte[] head, byte[] data, byte[] thumbnail)
+        {
+            uint thumbnailLength = thumbnail == null ? 0 : (uint)thumbnail.Length;
+            uint exiflength = (uint)(head.Length + data.Length + thumbnailLength);
+
+            // Update the exif size in the head.
+            uint lh = exiflength >> 8 & 0xFF;
+            uint ll = exiflength & 0xFF;
+            head[0] = (byte)lh;
+            head[1] = (byte)ll;
+
+            outfile.Write(head, 0, head.Length);
+            outfile.Write(data, 0, data.Length);
+            if (thumbnailLength > 0)
+            {
+                outfile.Write(thumbnail, 0, thumbnail.Length);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private bool ProcessExif(Stream outfile, byte[] exif, Action<ExifDirectory> exifAction)
         {
             mMemOps = new MemOperations();
             Console.WriteLine("Exif header is {0} bytes long", exif.Length);
@@ -349,9 +207,6 @@ namespace ExifHeader
                 Console.WriteLine("Suspicious offset of first IFD value {0}", firstOffset);
             }
 
-            // Initialize dynamic exif data here and hope that it is filled out in ProcessExifDir.
-            mExifData.Reset();
-
             // Process the RAW exif data into an ExifDirectory for further parsing.
             // First directory starts 16 bytes in.  All offset are relative to 8 bytes in.
             ExifDirectory dir = ProcessExifDir(outfile, exif, 8 + firstOffset, 8, exif.Length - 8, 0);
@@ -361,28 +216,30 @@ namespace ExifHeader
                 // If we succeeded in parsing the Exif directory,
                 // then let's write out all the data.
 
-                // We need to...
-                // 1. Remove the GPS data from the ExifDirectory.
-                // 2. Insert new GPS data.
+                // Do the user action on the directory
+                if (exifAction != null)
+                {
+                    exifAction(dir);
+                }
 
                 // Copy the exif header to the output stream up to firstOffset
                 byte[] head = new byte[8+firstOffset];
-                CopyBytes(head, (uint)(8 + firstOffset), exif, 0);
+                mMemOps.CopyBytes(head, (uint)(8 + firstOffset), exif, 0);
 
                 // Process the directory and extract the thumbnail.
-                byte[] thumbnail = GetThumbnail(dir, exif, (uint)firstOffset);
+                byte[] thumbnail = dir.GetThumbnail(exif, (uint)firstOffset);
 
                 // Convert the ExifDirectory back into RAW exif data.
-                byte[] data = dir.BuildData(mMemOps, (uint)firstOffset);
+                byte[] data = dir.BuildData((uint)firstOffset);
                 int dataLength = data.Length;
 
                 // Assuming that the data will be the same size if we update the thumbnail data,
                 // update the thumbnail in the ExifDirectory and rebuild the data.
                 uint thumbnailOffset = (uint)(head.Length + data.Length);
-                UpdateThumbnail(dir, thumbnail, thumbnailOffset - (uint)firstOffset);
+                dir.UpdateThumbnail(thumbnail, thumbnailOffset - (uint)firstOffset);
 
                 // Regen the data again.
-                data = dir.BuildData(mMemOps, (uint)firstOffset);
+                data = dir.BuildData((uint)firstOffset);
                 if (data.Length != dataLength)
                 {
                     throw new Exception("The data length changed");
@@ -394,10 +251,14 @@ namespace ExifHeader
             return (dir != null);
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         private static int DirEntryOffset(int start, int entry)
         {
             return start + 2 + (12 * entry);
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         private ExifDirectory ProcessExifSubDirTag(Stream outfile, byte[] exif, ExifFormat format, int offsetBase, int offset, int length, int nestingLevel)
         {
@@ -416,9 +277,11 @@ namespace ExifHeader
             return ProcessExifDir(outfile, exif, subdirStart, offsetBase, length, nestingLevel + 1);
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         private ExifDirectory ProcessExifDir(Stream outfile, byte[] exif, int start, int offsetBase, int length, int nestingLevel)
         {
-            ExifDirectory directory = new ExifDirectory();
+            ExifDirectory directory = new ExifDirectory(mMemOps);
 
             if (nestingLevel > 4)
             {
@@ -475,7 +338,7 @@ namespace ExifHeader
                 }
 
                 entry.data = new byte[entry.size];
-                CopyBytes(entry.data, entry.size, exif, dataoffset);
+                mMemOps.CopyBytes(entry.data, entry.size, exif, dataoffset);
 
                 switch (entry.tag)
                 {
@@ -587,11 +450,15 @@ namespace ExifHeader
             return directory;
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         private bool ProcessXmp(Stream outfile, byte[] xmp)
         {
             outfile.Write(xmp, 0, xmp.Length);
             return true;
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         // Read one byte from the instream and write it through to the outstream
         // Returns the byte
@@ -602,12 +469,16 @@ namespace ExifHeader
             return (byte)result;
         }
 
+        ///////////////////////////////////////////////////////////////////////
+
         // Read one byte from the instream
         // Returns the byte
         private byte ReadByte(Stream instream)
         {
             return (byte)instream.ReadByte();
         }
+
+        ///////////////////////////////////////////////////////////////////////
 
         private void ReadThroughRemaining(Stream outfile, Stream infile)
         {
@@ -620,123 +491,8 @@ namespace ExifHeader
             }
         }
 
-        private void CopyBytes(byte[] destination, uint size, byte[] bytes, int offset)
-        {
-            Array.Copy(bytes, offset, destination, 0, size);
-        }
+        ///////////////////////////////////////////////////////////////////////
 
-#if DEBUG
-        public bool DebugCompareStreams(Stream s1, Stream s2)
-        {
-            bool result = false;
-
-            s1.Seek(0, SeekOrigin.Begin);
-            s2.Seek(0, SeekOrigin.Begin);
-
-            if (s1.Length != s2.Length)
-            {
-                // Different lengths.
-                Console.WriteLine("ERROR: DebugCompareStreams - Streams are different lengths, ({0} and {1})", s1.Length, s2.Length);
-                //return;
-            }
-
-            int b1 = 0;
-            int b2 = 0;
-            do
-            {
-                b1 = s1.ReadByte();
-                b2 = s2.ReadByte();
-            }
-            while ((b1 == b2) && (b1 != -1) && (b2 != -1));
-
-            if (b1 != b2)
-            {
-                Console.WriteLine("ERROR: DebugCompareStreams - Streams do not match!");
-            }
-            else
-            {
-                Console.WriteLine("DebugComareStreams - Streams are identical");
-                result = true;
-            }
-
-            return result;
-        }
-
-        private void LaunchCompare(string file1, string file2)
-        {
-            System.Diagnostics.ProcessStartInfo info = new System.Diagnostics.ProcessStartInfo();
-            info.FileName = "comparejpeg.bat";
-            info.Arguments = "\"" + file1 + "\"" + " " + "\"" + file2 + "\"";
-            info.UseShellExecute = true;
-            System.Diagnostics.Process.Start(info);
-        }
-
-        public void UnitTest(string filename)
-        {
-            // Open the file for reading
-            FileStream infile = new FileStream(filename, FileMode.Open, FileAccess.Read);
-
-            // Create the output stream - memory backed, not file.
-            MemoryStream outfile = new MemoryStream();
-
-            // Scan through the file looking for existing data
-            // If data does not exist then add it to the file and update the headers
-            // If it does exist, then replace it and update the headers.
-            bool result = ProcessJpegSections(outfile, infile, null);
-
-            if (result)
-            {
-                if (DebugCompareStreams(outfile, infile))
-                {
-                    Console.WriteLine("Output matches {0}", filename);
-                }
-                else
-                {
-                    // The files are different so we should compare them
-                    WriteStream(outfile, "test.jpg");
-                    LaunchCompare(filename, "test.jpg");
-                }
-
-                // Run the test again, but with our own file to ensure that
-                // we can read it and we write it out again the same.
-                outfile.Seek(0, SeekOrigin.Begin);
-                MemoryStream test2 = new MemoryStream();
-                ProcessJpegSections(test2, outfile, null);
-                if (DebugCompareStreams(test2, outfile))
-                {
-                    Console.WriteLine("test1 matches test2");
-                }
-                else
-                {
-                    // The files are different so we should compare them
-                    WriteStream(outfile, "test2.jpg");
-                    LaunchCompare("test1.jpg", "test2.jpg");
-                }
-            }
-
-            outfile.Close();
-        }
-
-#endif
-
-        // Value is nullable and initializes to null.
-        // We only is it if is not null.
-        private GpsLocation? mGpsData;
-
-        // Data that is collected when processing the exif directory.
-        // This is information we need to help write out a new exif directory.
-        struct ExifParseData
-        {
-            // The offset of the location where the GPS directory data is stored.
-            public int      mGpsOffset;
-
-            public void Reset()
-            {
-                mGpsOffset = 0;
-            }
-        };
-        
-        private ExifParseData mExifData;        
         private MemOperations mMemOps;
 
         // Constants
@@ -752,118 +508,5 @@ namespace ExifHeader
         private const byte M_IPTC= 0xED;          // IPTC marker
 
         private const int  M_XMP = 0x10E1;        // Not a real tag (same value in file as Exif!)
-    }
-
-    public enum Tag
-    {
-        INTEROP_INDEX        = 0x0001,
-        INTEROP_VERSION      = 0x0002,
-        IMAGE_WIDTH          = 0x0100,
-        IMAGE_LENGTH         = 0x0101,
-        BITS_PER_SAMPLE      = 0x0102,
-        COMPRESSION          = 0x0103,
-        PHOTOMETRIC_INTERP   = 0x0106,
-        FILL_ORDER           = 0x010A,
-        DOCUMENT_NAME        = 0x010D,
-        IMAGE_DESCRIPTION    = 0x010E,
-        MAKE                 = 0x010F,
-        MODEL                = 0x0110,
-        SRIP_OFFSET          = 0x0111,
-        ORIENTATION          = 0x0112,
-        SAMPLES_PER_PIXEL    = 0x0115,
-        ROWS_PER_STRIP       = 0x0116,
-        STRIP_BYTE_COUNTS    = 0x0117,
-        X_RESOLUTION         = 0x011A,
-        Y_RESOLUTION         = 0x011B,
-        PLANAR_CONFIGURATION = 0x011C,
-        RESOLUTION_UNIT      = 0x0128,
-        TRANSFER_FUNCTION    = 0x012D,
-        SOFTWARE             = 0x0131,
-        DATETIME             = 0x0132,
-        ARTIST               = 0x013B,
-        WHITE_POINT          = 0x013E,
-        PRIMARY_CHROMATICITIES = 0x013F,
-        TRANSFER_RANGE       = 0x0156,
-        JPEG_PROC            = 0x0200,
-        THUMBNAIL_OFFSET     = 0x0201,
-        THUMBNAIL_LENGTH     = 0x0202,
-        Y_CB_CR_COEFFICIENTS = 0x0211,
-        Y_CB_CR_SUB_SAMPLING = 0x0212,
-        Y_CB_CR_POSITIONING  = 0x0213,
-        REFERENCE_BLACK_WHITE= 0x0214,
-        RELATED_IMAGE_WIDTH  = 0x1001,
-        RELATED_IMAGE_LENGTH = 0x1002,
-        CFA_REPEAT_PATTERN_DIM = 0x828D,
-        CFA_PATTERN1         = 0x828E,
-        BATTERY_LEVEL        = 0x828F,
-        COPYRIGHT            = 0x8298,
-        EXPOSURETIME         = 0x829A,
-        FNUMBER              = 0x829D,
-        IPTC_NAA             = 0x83BB,
-        EXIF_OFFSET          = 0x8769,
-        INTER_COLOR_PROFILE  = 0x8773,
-        EXPOSURE_PROGRAM     = 0x8822,
-        SPECTRAL_SENSITIVITY = 0x8824,
-        GPSINFO              = 0x8825,
-        ISO_EQUIVALENT       = 0x8827,
-        OECF                 = 0x8828,
-        EXIF_VERSION         = 0x9000,
-        DATETIME_ORIGINAL    = 0x9003,
-        DATETIME_DIGITIZED   = 0x9004,
-        COMPONENTS_CONFIG    = 0x9101,
-        CPRS_BITS_PER_PIXEL  = 0x9102,
-        SHUTTERSPEED         = 0x9201,
-        APERTURE             = 0x9202,
-        BRIGHTNESS_VALUE     = 0x9203,
-        EXPOSURE_BIAS        = 0x9204,
-        MAXAPERTURE          = 0x9205,
-        SUBJECT_DISTANCE     = 0x9206,
-        METERING_MODE        = 0x9207,
-        LIGHT_SOURCE         = 0x9208,
-        FLASH                = 0x9209,
-        FOCALLENGTH          = 0x920A,
-        MAKER_NOTE           = 0x927C,
-        USERCOMMENT          = 0x9286,
-        SUBSEC_TIME          = 0x9290,
-        SUBSEC_TIME_ORIG     = 0x9291,
-        SUBSEC_TIME_DIG      = 0x9292,
-        WINXP_TITLE          = 0x9c9b, // Windows XP - not part of exif standard.
-        WINXP_COMMENT        = 0x9c9c, // Windows XP - not part of exif standard.
-        WINXP_AUTHOR         = 0x9c9d, // Windows XP - not part of exif standard.
-        WINXP_KEYWORDS       = 0x9c9e, // Windows XP - not part of exif standard.
-        WINXP_SUBJECT        = 0x9c9f, // Windows XP - not part of exif standard.
-
-        FLASH_PIX_VERSION    = 0xA000,
-        COLOR_SPACE          = 0xA001,
-        EXIF_IMAGEWIDTH      = 0xA002,
-        EXIF_IMAGELENGTH     = 0xA003,
-        RELATED_AUDIO_FILE   = 0xA004,
-        INTEROP_OFFSET       = 0xA005,
-        FLASH_ENERGY         = 0xA20B,
-        SPATIAL_FREQ_RESP    = 0xA20C,
-        FOCAL_PLANE_XRES     = 0xA20E,
-        FOCAL_PLANE_YRES     = 0xA20F,
-        FOCAL_PLANE_UNITS    = 0xA210,
-        SUBJECT_LOCATION     = 0xA214,
-        EXPOSURE_INDEX       = 0xA215,
-        SENSING_METHOD       = 0xA217,
-        FILE_SOURCE          = 0xA300,
-        SCENE_TYPE           = 0xA301,
-        CFA_PATTERN          = 0xA302,
-        CUSTOM_RENDERED      = 0xA401,
-        EXPOSURE_MODE        = 0xA402,
-        WHITEBALANCE         = 0xA403,
-        DIGITALZOOMRATIO     = 0xA404,
-        FOCALLENGTH_35MM     = 0xA405,
-        SCENE_CAPTURE_TYPE   = 0xA406,
-        GAIN_CONTROL         = 0xA407,
-        CONTRAST             = 0xA408,
-        SATURATION           = 0xA409,
-        SHARPNESS            = 0xA40A,
-        DISTANCE_RANGE       = 0xA40C,
-
-        // Special non-exif tags used for internal purposes
-        // Use more than 16 bits to avoid collisions with real tags.
-        EXIF_OFFSET_APPENDED = 0x10000,
     }
 }

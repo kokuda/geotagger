@@ -138,6 +138,11 @@ namespace ExifHeader
             }
         }
 
+        public void CopyBytes(byte[] destination, uint size, byte[] bytes, int offset)
+        {
+            Array.Copy(bytes, offset, destination, 0, size);
+        }
+
         private ByteOrder mExifByteOrder;
     }
 }

@@ -20,7 +20,7 @@
 
 namespace ExifHeader
 {
-    struct GpsCoord
+    public struct GpsCoord
     {
         public GpsCoord(Rational deg, Rational min, Rational sec)
         {
@@ -68,7 +68,7 @@ namespace ExifHeader
         private Rational mSecond;
     }
 
-    struct GpsLocation
+    public struct GpsLocation
     {
         public enum LatRef
         {
@@ -94,8 +94,25 @@ namespace ExifHeader
         public GpsLocation(decimal lat, decimal lon, decimal alt)
         {
             // Convert from decimal to deg/min/sec.
-            mLatRef = (lat >= 0) ? LatRef.NORTH : LatRef.SOUTH;
-            mLonRef = (lon >= 0) ? LonRef.WEST : LonRef.EAST;
+            if (lat >= 0)
+            {
+                mLatRef = LatRef.NORTH;
+            }
+            else
+            {
+                mLatRef = LatRef.SOUTH;
+                lat = -lat;
+            }
+
+            if (lon >= 0)
+            {
+                mLonRef = LonRef.EAST;
+            }
+            else
+            {
+                mLonRef = LonRef.WEST;
+                lon = -lon;
+            }
 
             mLat = new GpsCoord(lat);
             mLon = new GpsCoord(lon);
@@ -117,6 +134,31 @@ namespace ExifHeader
         public void SetAltitude(Rational alt)
         {
             mAlt = alt;
+        }
+
+        public LatRef latRef
+        {
+            get { return mLatRef; }
+        }
+
+        public LonRef lonRef
+        {
+            get { return mLonRef; }
+        }
+
+        public GpsCoord lat
+        {
+            get { return mLat; }
+        }
+
+        public GpsCoord lon
+        {
+            get { return mLon; }
+        }
+
+        public Rational alt
+        {
+            get { return mAlt; }
         }
 
         private LatRef mLatRef;

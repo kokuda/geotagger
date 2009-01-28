@@ -20,7 +20,7 @@
 
 namespace ExifHeader
 {
-    struct Rational
+    public struct Rational
     {
         public Rational(int num, int den)
         {
@@ -59,6 +59,17 @@ namespace ExifHeader
         public override string ToString()
         {
             return System.String.Format("{0}/{1}", mNumerator, mDenominator);
+        }
+
+        public static Rational operator -(Rational r)
+        {
+            return new Rational(-r.numerator, r.denominator);
+        }
+
+        // Explicit conversion to float
+        public static explicit operator float(Rational r)
+        {
+            return ((float)r.numerator) / ((float)r.denominator);
         }
 
         private int mNumerator;
