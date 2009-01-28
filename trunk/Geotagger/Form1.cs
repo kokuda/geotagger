@@ -37,6 +37,7 @@ namespace Geotagger
         private ScriptInterface mScriptInterface;
         private MapInterface    mMapInterface;
         private PhotoCollection mPhotoCollection;
+        private Settings        mSettings;
 
         public Form1()
         {
@@ -48,6 +49,7 @@ namespace Geotagger
             mScriptInterface = new ScriptInterface(this);
             mMapInterface = new MapInterface(webBrowser1);
             mPhotoCollection = new PhotoCollection();
+            mSettings = new Settings();
 
             // Register the callback interface to the Javascript.
             webBrowser1.ObjectForScripting = mScriptInterface;
@@ -266,8 +268,11 @@ namespace Geotagger
                 {
                     // There is already a marker on the map for this photo so just move it.
                     GPSTrackPoint location = photo.nearestPoint.mBefore;
-                    photo.SetLocation(location.mLat, location.mLon, location.mEle);
-                    mMapInterface.MoveMarker(photo.markerObject, location);
+                    if (location != null)
+                    {
+                        photo.SetLocation(location.mLat, location.mLon, location.mEle);
+                        mMapInterface.MoveMarker(photo.markerObject, location);
+                    }
                 }
             }
         }
@@ -305,7 +310,7 @@ namespace Geotagger
             // Maybe we save whichever are highlighted.
 
             // Use one Writer repeatedly, resetting the location with each photo.
-            ExifHeader.JpegWriter writer = new ExifHeader.JpegWriter();
+            JpegWriter writer = new JpegWriter(mSettings);
 
             foreach (ListViewItem i in listView1.Items)
             {
@@ -314,8 +319,11 @@ namespace Geotagger
                 PhotoData photo = mPhotoCollection.GetPhoto(filename);
                 if (photo.nearestPoint != null)
                 {
-                    writer.gpsLocation = new ExifHeader.GpsLocation(photo.latitude, photo.longitude, photo.height);
-                    writer.WriteDataToFile(filename);
+                    // Instead of making a backup, we will not overwrite the original... yet.
+                    // Once we are more confident that needing the backup will be the exception
+                    // and not the rule we can change this back.
+                    //writer.MakeBackup(filename);
+                    writer.WriteDataToFile(filename, new ExifHeader.GpsLocation(photo.latitude, photo.longitude, photo.elevation));
                 }
             }
         }
@@ -337,7 +345,7 @@ namespace Geotagger
 
             if (dialog1.ShowDialog() == DialogResult.OK)
             {
-                ExifHeader.JpegWriter writer = new ExifHeader.JpegWriter();
+                JpegWriter writer = new JpegWriter(mSettings);
 
                 // Read the files
                 foreach (String file in dialog1.FileNames)
@@ -345,6 +353,24 @@ namespace Geotagger
                     writer.UnitTest(file);
                 }
             }
+        }
+
+        private void debugModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mSettings.DebugMode = !mSettings.DebugMode;
+            ((ToolStripMenuItem)sender).Checked = mSettings.DebugMode;
+        }
+
+        private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show the help.
+            Help.ShowHelp(this, helpProvider1.HelpNamespace);
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox1 about = new AboutBox1();
+            about.ShowDialog();
         }
     }
 }

@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Geotagger")]
-[assembly: AssemblyCopyright("Copyright ©  2007 Kaz Okuda")]
+[assembly: AssemblyCopyright("Copyright © 2009 Kaz Okuda")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

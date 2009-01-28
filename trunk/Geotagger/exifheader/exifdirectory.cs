@@ -28,31 +28,231 @@ namespace ExifHeader
     // Losslessly update the exif data in a JPG file.
     public struct ExifEntry
     {
-        public uint size;
         public Tag tag;
         public ExifFormat format;
         public uint components;
+        public uint size;
         public byte[] data;
         public ExifDirectory subdir;
+
+        // Construct ExifEntry with initial values.
+        // data will be allocated, but must be initialized.
+        public ExifEntry(Tag t, ExifFormat f, uint c, uint s)
+        {
+            tag = t;
+            format = f;
+            components = c;
+            size = s;
+            data = new byte[size];
+            subdir = null;
+        }
     }
 
     public class ExifDirectory : List<ExifEntry>
     {
-        public uint Output(Stream outfile, MemOperations memOps, uint offsetBase)
+        // Construct with a MemOperations object for the byte order.
+        // We could change the output byte order by changing this object.
+        public ExifDirectory(MemOperations memOps)
         {
-            byte[] data = BuildData(memOps, offsetBase);
-            outfile.Write(data, 0, data.Length);
-            return (uint)data.Length;
+            mMemOps = memOps;
         }
 
-        public uint AlignDirectoryOffset(uint dataOffset)
+        ///////////////////////////////////////////////////////////////////////
+
+        // Use the data collected in the ExifDirectory to extract the thumbnail, if available.
+        public byte[] GetThumbnail(byte[] exif, uint firstOffset)
         {
-            // Picasa seems to align each directory to 4 bytes.
-            // I'm not sure if this is needed, but it shouldn't hurt.
-            return (dataOffset + 3) & ~(uint)3;
+            byte[] thumbnail = null;
+            uint thumbnailSize = 0;
+            uint thumbnailOffset = 0;
+
+            // Recursively search through the ExifDirectory for the thumbnail offset and length
+            // If they are found then return a byte array containing the thumbnail.
+            foreach (ExifEntry e in this)
+            {
+                switch (e.tag)
+                {
+                    case Tag.THUMBNAIL_OFFSET:
+                        thumbnailOffset = mMemOps.GetUInt32(e.data, 0);
+                        break;
+
+                    case Tag.THUMBNAIL_LENGTH:
+                        thumbnailSize = mMemOps.GetUInt32(e.data, 0);
+                        break;
+
+                    default:
+                        // If this is a subdir, then search that for the thumbnail.
+                        // In theory, if the thumbnail size and offset are in different
+                        // directories, then we won't find it.  Let's hope that doesn't happen.
+                        if (e.subdir != null)
+                        {
+                            thumbnail = e.subdir.GetThumbnail(exif, firstOffset);
+                            if (thumbnail != null)
+                            {
+                                break;
+                            }
+                        }
+                        break;
+                }
+            }
+
+            // Store the thumbnail.
+            if (thumbnailSize > 0 && thumbnailOffset > 0)
+            {
+                thumbnail = new byte[thumbnailSize];
+                mMemOps.CopyBytes(thumbnail, thumbnailSize, exif, (int)(thumbnailOffset + firstOffset));
+                Console.WriteLine("Thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
+            }
+            else
+            {
+                //Console.WriteLine("No thumbnail found, size={0}, offset={1}", thumbnailSize, thumbnailOffset);
+            }
+
+            return thumbnail;
         }
 
-        public byte[] BuildData(MemOperations memOps, uint offsetBase)
+        ///////////////////////////////////////////////////////////////////////
+
+        public void UpdateThumbnail(byte[] thumbnail, uint thumbnailOffset)
+        {
+            // Recursively search through the ExifDirectory for the thumbnail offset and length
+            // If they are found then return a byte array containing the thumbnail.
+            foreach (ExifEntry e in this)
+            {
+                switch (e.tag)
+                {
+                    case Tag.THUMBNAIL_OFFSET:
+                        mMemOps.SetUInt32(e.data, 0, thumbnailOffset);
+                        break;
+
+                    case Tag.THUMBNAIL_LENGTH:
+                        // We don't need to write the length since it should be the same.
+                        // In fact, this would be a good place to confirm that
+                        if (mMemOps.GetUInt32(e.data, 0) != (uint)thumbnail.Length)
+                        {
+                            throw new Exception("The thumbnail length is invalid");
+                        }
+                        //mMemOps.SetUInt32(e.data, 0, (uint)thumbnail.Length);
+                        break;
+
+                    default:
+                        if (e.subdir != null)
+                        {
+                            e.subdir.UpdateThumbnail(thumbnail, thumbnailOffset);
+                        }
+                        break;
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public void RemoveTag(Tag tag)
+        {
+            RemoveAll(delegate(ExifHeader.ExifEntry e)
+            {
+                if (e.tag == ExifHeader.Tag.GPSINFO)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (e.subdir != null)
+                    {
+                        e.subdir.RemoveTag(tag);
+                    }
+                    return false;
+                }
+            });
+        }
+
+        public void CreateGps(GpsLocation gpsData)
+        {
+            ExifDirectory dir = new ExifDirectory(mMemOps);
+            ExifEntry e;
+
+            // Insert Version Info                
+            e = new ExifEntry(0, new ExifFormat(1), 4, 4);
+            e.data[0] = 2;
+            e.data[1] = 0;
+            e.data[2] = 0;
+            e.data[3] = 0;
+            dir.Add(e);
+
+            // Insert the lat ref
+            e = new ExifEntry((Tag)1, new ExifFormat(2), 2, 2);
+            if (gpsData.latRef == GpsLocation.LatRef.NORTH)
+            {
+                e.data[0] = (byte)'N';
+            }
+            else
+            {
+                e.data[0] = (byte)'S';
+            }
+            e.data[1] = 0;
+            dir.Add(e);
+
+            // Insert the lat
+            e = new ExifEntry((Tag)2, new ExifFormat(5), 3, 24);
+            mMemOps.SetUInt32(e.data, 0, (uint)gpsData.lat.degree.numerator);
+            mMemOps.SetUInt32(e.data, 4, (uint)gpsData.lat.degree.denominator);
+            mMemOps.SetUInt32(e.data, 8, (uint)gpsData.lat.minute.numerator);
+            mMemOps.SetUInt32(e.data, 12, (uint)gpsData.lat.minute.denominator);
+            mMemOps.SetUInt32(e.data, 16, (uint)gpsData.lat.second.numerator);
+            mMemOps.SetUInt32(e.data, 20, (uint)gpsData.lat.second.denominator);
+            dir.Add(e);
+
+            // Insert the lon ref
+            e = new ExifEntry((Tag)3, new ExifFormat(2), 2, 2);
+            if (gpsData.lonRef == GpsLocation.LonRef.EAST)
+            {
+                e.data[0] = (byte)'E';
+            }
+            else
+            {
+                e.data[0] = (byte)'W';
+            }
+            e.data[1] = 0;
+            dir.Add(e);
+
+            // Insert the lon
+            e = new ExifEntry((Tag)4, new ExifFormat(5), 3, 24);
+            mMemOps.SetUInt32(e.data, 0, (uint)gpsData.lon.degree.numerator);
+            mMemOps.SetUInt32(e.data, 4, (uint)gpsData.lon.degree.denominator);
+            mMemOps.SetUInt32(e.data, 8, (uint)gpsData.lon.minute.numerator);
+            mMemOps.SetUInt32(e.data, 12, (uint)gpsData.lon.minute.denominator);
+            mMemOps.SetUInt32(e.data, 16, (uint)gpsData.lon.second.numerator);
+            mMemOps.SetUInt32(e.data, 20, (uint)gpsData.lon.second.denominator);
+            dir.Add(e);
+
+            // Insert alt sign (It seems that 1 means negative?)
+            e = new ExifEntry((Tag)5, new ExifFormat(1), 1, 1);
+            Rational alt = gpsData.alt;
+            if (((float)alt) < 0)
+            {
+                e.data[0] = 1;
+                alt = -alt;
+            }
+            else
+            {
+                e.data[0] = 0;
+            }
+            dir.Add(e);
+
+            // Insert the alt
+            e = new ExifEntry((Tag)6, new ExifFormat(5), 1, 8);
+            mMemOps.SetUInt32(e.data, 0, (uint)alt.numerator);
+            mMemOps.SetUInt32(e.data, 4, (uint)alt.denominator);
+            dir.Add(e);
+
+            ExifEntry entry = new ExifEntry(Tag.GPSINFO, new ExifFormat(4), 1, 4);
+            entry.subdir = dir;
+            this.Insert(this.Count - 1, entry);
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        public byte[] BuildData(uint offsetBase)
         {
             uint offset = 0;
             uint dirCount = (uint)this.Count;
@@ -69,7 +269,7 @@ namespace ExifHeader
             byte[] data = new byte[2 + dirCount * 12 + 4];
 
             // Write out the number of entries.
-            offset = WriteUInt16(data, offset, memOps, dirCount);
+            offset = WriteUInt16(data, offset, dirCount);
 
             // Any extra data will follow this directory.
             // It will be 12 * count bytes past where we wrote the count
@@ -82,9 +282,9 @@ namespace ExifHeader
             for (int i = 0; i < dirCount; ++i)
             {
                 ExifEntry e = this[i];
-                offset = WriteUInt16(data, offset, memOps, (uint)e.tag);
-                offset = WriteUInt16(data, offset, memOps, (uint)e.format);
-                offset = WriteUInt32(data, offset, memOps, e.components);
+                offset = WriteUInt16(data, offset, (uint)e.tag);
+                offset = WriteUInt16(data, offset, (uint)e.format);
+                offset = WriteUInt32(data, offset, e.components);
 
 
                 switch (e.tag)
@@ -96,8 +296,8 @@ namespace ExifHeader
 
                         dataOffset = AlignDirectoryOffset(dataOffset);
 
-                        e.data = e.subdir.BuildData(memOps, offsetBase + dataOffset);
-                        offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
+                        e.data = e.subdir.BuildData(offsetBase + dataOffset);
+                        offset = WriteUInt32(data, offset, offsetBase + dataOffset);
                         offsetList[i] = dataOffset;
                         dataOffset += (uint)e.data.Length;
                         this[i] = e;
@@ -110,7 +310,7 @@ namespace ExifHeader
                         {
                             // We will put the data at the end of the elements
                             // so just write out the offset here.
-                            offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
+                            offset = WriteUInt32(data, offset, offsetBase + dataOffset);
 
                             // record this for later so we can write out the data.
                             offsetList[i] = dataOffset;
@@ -148,14 +348,14 @@ namespace ExifHeader
 
                 // Build a directory entry, but we will append it to the directory
                 // instead of including it in the directory
-                appendedData = appendedDir.BuildData(memOps, offsetBase + dataOffset);
-                offset = WriteUInt32(data, offset, memOps, offsetBase + dataOffset);
+                appendedData = appendedDir.BuildData(offsetBase + dataOffset);
+                offset = WriteUInt32(data, offset, offsetBase + dataOffset);
                 appendedOffset = dataOffset;
                 dataOffset += (uint)appendedData.Length;
             }
             else
             {
-                offset = WriteUInt32(data, offset, memOps, 0);
+                offset = WriteUInt32(data, offset, 0);
             }
 
             // Ensure that there is enough space for all the output
@@ -185,16 +385,33 @@ namespace ExifHeader
             return data;
         }
 
-        private static uint WriteUInt32(byte[] bytes, uint offset, MemOperations memOps, uint value)
+        ///////////////////////////////////////////////////////////////////////
+
+        private uint WriteUInt32(byte[] bytes, uint offset, uint value)
         {
-            memOps.SetUInt32(bytes, offset, value);
+            mMemOps.SetUInt32(bytes, offset, value);
             return offset + 4;
         }
 
-        private static uint WriteUInt16(byte[] data, uint offset, MemOperations memOps, uint value)
+        ///////////////////////////////////////////////////////////////////////
+
+        private uint WriteUInt16(byte[] data, uint offset, uint value)
         {
-            memOps.SetUInt16(data, offset, value);
+            mMemOps.SetUInt16(data, offset, value);
             return offset + 2;
         }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private uint AlignDirectoryOffset(uint dataOffset)
+        {
+            // Picasa seems to align each directory to 4 bytes.
+            // I'm not sure if this is needed, but it shouldn't hurt.
+            return (dataOffset + 3) & ~(uint)3;
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+        private MemOperations mMemOps;
     }
 }

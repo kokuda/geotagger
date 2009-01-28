@@ -57,14 +57,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutBox1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox1.Designer.cs">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+    </Compile>
     <Compile Include="exifheader\exifdirectory.cs" />
     <Compile Include="exifheader\exifformat.cs" />
+    <Compile Include="exifheader\exiftag.cs" />
     <Compile Include="exifheader\gpslocation.cs" />
     <Compile Include="exifheader\memoperations.cs" />
     <Compile Include="exifheader\rational.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="exifheader\writer.cs" />
+    <Compile Include="exifheader\jpegprocessor.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,6 +80,7 @@
     </Compile>
     <Compile Include="GPSTrack.cs" />
     <Compile Include="HttpServer.cs" />
+    <Compile Include="JpegWriter.cs" />
     <Compile Include="MapInterface.cs" />
     <Compile Include="PhotoCollection.cs" />
     <Compile Include="PhotoData.cs">
@@ -80,6 +88,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AboutBox1.resx">
+      <DependentUpon>AboutBox1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Form1.cs</DependentUpon>
@@ -104,6 +115,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="ScriptInterface.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\html\gmapinterface.js" />
