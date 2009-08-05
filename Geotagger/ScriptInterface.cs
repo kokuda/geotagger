@@ -52,6 +52,11 @@ namespace Geotagger
             mForm.Map_MarkerDrop(index, lat, lng);
         }
 
+        public void Alert(string msg, string title)
+        {
+            System.Windows.Forms.MessageBox.Show(msg, title);
+        }
+
         ///////////////////////////////////////////////////////////////////////
         // Private
         ///////////////////////////////////////////////////////////////////////

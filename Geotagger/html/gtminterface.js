@@ -59,6 +59,11 @@ GTMInterface = new function()
 	{
 		window.external.MarkerDrop(id, lat, lng);
 	}
+	
+	this.Alert = function(msg, title)
+	{
+		window.external.Alert(msg, title);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -123,4 +128,12 @@ function GTMInterface_MoveMarker(marker, lat, lng)
 	}
 	
 	return null;
+}
+
+function GTMInterface_Search(address)
+{
+	if (GTMInterface.mMapInterface != null)
+	{
+		GTMInterface.mMapInterface.Search(address);
+	}
 }

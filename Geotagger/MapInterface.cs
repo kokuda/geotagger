@@ -44,14 +44,14 @@ namespace Geotagger
             CallJavaScript("GTMInterface_StartTrack");
             foreach (GPSTrackPoint p in track)
             {
-                CallJavaScript("GTMInterface_AddTrackPoint", new Object[] { p.mLat, p.mLon });
+                CallJavaScript("GTMInterface_AddTrackPoint", p.mLat, p.mLon);
             }
             CallJavaScript("GTMInterface_EndTrack");
         }
 
         public Object CreateMarker(int id, GPSTrackPoint location)
         {
-            return CallJavaScript("GTMInterface_CreateMarker", new Object[] { id, location.mLat, location.mLon });
+            return CallJavaScript("GTMInterface_CreateMarker", id, location.mLat, location.mLon);
         }
 
         public void MoveMarker(Object marker, GPSTrackPoint location)
@@ -62,7 +62,12 @@ namespace Geotagger
             //t.InvokeMember("MoveMarker", ...
 
             // For now we implement it by passing this marker object back into the Action Script to manipulate.
-            CallJavaScript("GTMInterface_MoveMarker", new Object[] { marker, location.mLat, location.mLon});
+            CallJavaScript("GTMInterface_MoveMarker", marker, location.mLat, location.mLon);
+        }
+
+        public void Search(string searchString)
+        {
+            CallJavaScript("GTMInterface_Search", searchString);
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -76,7 +81,7 @@ namespace Geotagger
             return mWebBrowser.Document.InvokeScript(jsFunc);
         }
 
-        private Object CallJavaScript(string jsFunc, Object[] args)
+        private Object CallJavaScript(string jsFunc, params Object[] args)
         {
             return mWebBrowser.Document.InvokeScript(jsFunc, args);
         }
