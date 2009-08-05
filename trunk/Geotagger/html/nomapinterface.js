@@ -110,4 +110,11 @@ var NoMapInterface = new function()
 		marker.lng = lng;
 		document.getElementById("right").innerHTML += "Marker " + marker.id + " @ " + lat + "/" + lng + "<br />";
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Search: Find the given address and navigate the map to it.
+	this.Search = function (address)
+	{
+		document.getElementById("right").innerHTML += "Search '" + address + "' <br />";
+	}
 }

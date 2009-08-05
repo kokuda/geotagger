@@ -29,6 +29,7 @@ var GMapInterface = new function()
 	//////////////////////////////////////////////////////////////////////////
 	// Public members
 	this.mMap = null;
+	this.mGeocoder = null;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Check the availability of Google Maps (this will return false if the
@@ -60,6 +61,8 @@ var GMapInterface = new function()
 				}
 			}
 		);
+
+		mGeocoder = new GClientGeocoder();
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -124,5 +127,28 @@ var GMapInterface = new function()
 	this.MoveMarker = function (marker, lat, lng)
 	{
 		marker.setLatLng(new GLatLng(lat, lng));
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Search: Find the given address and navigate the map to it.
+	this.Search = function (address)
+	{
+		mGeocoder.getLatLng( address,
+			function(point)
+			{
+				if (!point)
+				{
+					GTMInterface.Alert("\"" + address + "\" not found", "Search Failed");
+				}
+				else
+				{
+					mMap.setCenter(point, 13);
+					var marker = new GMarker(point);
+					mMap.addOverlay(marker);
+					marker.openInfoWindowHtml(address);
+				}
+			}
+		);
+
 	}
 }

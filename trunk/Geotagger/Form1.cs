@@ -372,5 +372,13 @@ namespace Geotagger
             AboutBox1 about = new AboutBox1();
             about.ShowDialog();
         }
+
+        private void textBoxSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                mMapInterface.Search(textBoxSearch.Text);
+            }
+        }
     }
 }

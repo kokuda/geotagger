@@ -80,13 +80,16 @@ namespace Geotagger
             this.usePreviousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListSmall = new System.Windows.Forms.ImageList(this.components);
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLoadImages = new System.Windows.Forms.ToolStripButton();
             this.toolStripLoadGPX = new System.Windows.Forms.ToolStripButton();
             this.toolStripLocate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonSave = new System.Windows.Forms.ToolStripButton();
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxSearch = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -99,6 +102,7 @@ namespace Geotagger
             ((System.ComponentModel.ISupportInitialize)(this.trackBarTimeOffset)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -179,14 +183,14 @@ namespace Geotagger
             // contentsToolStripMenuItem
             // 
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.contentsToolStripMenuItem.Text = "Help...";
             this.contentsToolStripMenuItem.Click += new System.EventHandler(this.contentsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -205,7 +209,7 @@ namespace Geotagger
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.webBrowser1);
+            this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel2);
             this.splitContainer1.Size = new System.Drawing.Size(726, 430);
             this.splitContainer1.SplitterDistance = 213;
             this.splitContainer1.TabIndex = 2;
@@ -406,21 +410,6 @@ namespace Geotagger
             this.imageListSmall.ImageSize = new System.Drawing.Size(16, 16);
             this.imageListSmall.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // webBrowser1
-            // 
-            this.webBrowser1.AllowWebBrowserDrop = false;
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.helpProvider1.SetHelpKeyword(this.webBrowser1, "");
-            this.helpProvider1.SetHelpString(this.webBrowser1, "");
-            this.webBrowser1.IsWebBrowserContextMenuEnabled = false;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.helpProvider1.SetShowHelp(this.webBrowser1, true);
-            this.webBrowser1.Size = new System.Drawing.Size(509, 430);
-            this.webBrowser1.TabIndex = 0;
-            this.webBrowser1.WebBrowserShortcutsEnabled = false;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -478,6 +467,63 @@ namespace Geotagger
             // 
             this.helpProvider1.HelpNamespace = "http://code.google.com/p/geotagger/";
             // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.webBrowser1, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.label2, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.textBoxSearch, 1, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(509, 430);
+            this.tableLayoutPanel2.TabIndex = 1;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.AllowWebBrowserDrop = false;
+            this.tableLayoutPanel2.SetColumnSpan(this.webBrowser1, 2);
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.helpProvider1.SetHelpKeyword(this.webBrowser1, "");
+            this.helpProvider1.SetHelpString(this.webBrowser1, "");
+            this.webBrowser1.IsWebBrowserContextMenuEnabled = false;
+            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(0);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(100, 100);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.ScrollBarsEnabled = false;
+            this.helpProvider1.SetShowHelp(this.webBrowser1, true);
+            this.webBrowser1.Size = new System.Drawing.Size(509, 404);
+            this.webBrowser1.TabIndex = 0;
+            this.webBrowser1.WebBrowserShortcutsEnabled = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label2.Location = new System.Drawing.Point(3, 407);
+            this.label2.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(41, 20);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Search";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // textBoxSearch
+            // 
+            this.textBoxSearch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxSearch.Location = new System.Drawing.Point(47, 407);
+            this.textBoxSearch.Name = "textBoxSearch";
+            this.textBoxSearch.Size = new System.Drawing.Size(459, 20);
+            this.textBoxSearch.TabIndex = 2;
+            this.textBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxSearch_KeyDown);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -509,6 +555,8 @@ namespace Geotagger
             this.contextMenuStrip1.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -520,7 +568,6 @@ namespace Geotagger
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripMenuItem loadGPXToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadImagesToolStripMenuItem;
         private System.Windows.Forms.ListView listView1;
@@ -552,6 +599,10 @@ namespace Geotagger
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxSearch;
     }
 }
 
