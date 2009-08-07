@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////////////
+﻿//////////////////////////////////////////////////////////////////////////////
 //
 //    This file is part of Geotagger: A tool for geotagging photographs
 //    Copyright (C) 2007  Kaz Okuda (http://notions.okuda.ca)
@@ -19,12 +19,12 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-// Object for interfacing the GeoTagger application with Google Maps.
+// Object for interfacing the GeoTagger application with Bing Maps.
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-// Create Singleton GMapInterface as Google Map interface to geotagger.
-var GMapInterface = new function()
+// Create Singleton BMapInterface as Bing Map interface to geotagger.
+var BMapInterface = new function()
 {
 	//////////////////////////////////////////////////////////////////////////
 	// Public members
@@ -32,51 +32,88 @@ var GMapInterface = new function()
 	this.mGeocoder = null;
 
 	//////////////////////////////////////////////////////////////////////////
-	// Check the availability of Google Maps (this will return false if the
-	// GMap2 interface did not load properly.
+	// Check the availability of Bing Maps
 	this.IsAvailable = function()
 	{
-		return (typeof(GMap2) != "undefined");
+		return true;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// Initialize GMapInterface with the Google Map
+	// Initialize BMapInterface with the Bing Map
 	this.Initialize = function(map)
 	{
-		// TEST: Can control search bar inside of map with this.
-		// Allows search for locations as well as local searches.
-		// This may become mandatory - and we can add ads here when it does.
-		//var mapOptions = { googleBarOptions : { style : "new" } }
-		//mMap = new GMap2(map, mapOptions);
+		try
+		{
+			mMap = new VEMap(map);
+			mMap.LoadMap(new VELatLong(49.2, -123), 10);
 
-		mMap = new GMap2(map);
-		mMap.addControl(new GLargeMapControl());
-		mMap.addControl(new GMapTypeControl());
-		mMap.setCenter(new GLatLng(49.2, -123), 10, G_NORMAL_MAP);
-		//mMap.enableGoogleBar();
-
-		// Initialize callback handlers for the Google Map
-		
-		// Handle the map click event and return it to GeoTagger.
-		GEvent.addListener(mMap, "click",
-			function(marker, point)
+			var draggingElement = null;
+			var dragging = false;
+			var clickX = null;
+			var clickY = null;
+			var mouseHandler = function(e)
 			{
-				// If marker is null then this is a new point.
-				if (marker == null)
+				if (e.eventName == "onmousedown" && e.elementID != null)
 				{
-					GTMInterface.SingleClick(point.lat(), point.lng());
+					var shape = mMap.GetShapeByID(e.elementID);
+					if (shape.GetType() == VEShapeType.Pushpin)
+					{
+						draggingElement = shape;
+						dragging = false;	// Sticky
+						clickX = e.mapX;
+						clickY = e.mapY;
+						return true;
+					}
+				}
+				else if (e.eventName == "onmouseup" && draggingElement != null)
+				{
+					if (dragging)
+					{
+						var points = draggingElement.GetPoints();
+						GTMInterface.MarkerDrop(draggingElement.myID, points[0].Latitude, points[0].Longitude);
+					}
+					else
+					{
+						GTMInterface.MarkerClick(draggingElement.myID);
+					}
+					draggingElement = null;
+				}
+				else if (e.eventName == "onmousemove" && draggingElement != null)
+				{
+					if (!dragging)
+					{
+						// If we have moved sufficiently then we can begin dragging.
+						if (Math.abs(clickX - e.mapX) > 10 || Math.abs(clickY - e.mapY) > 10)
+						{
+							// Unstick.
+							dragging = true;
+						}
+					}
+					else
+					{
+						var point = mMap.PixelToLatLong(new VEPixel(e.mapX, e.mapY));
+						draggingElement.SetPoints(point);
+						return true;
+					}
 				}
 			}
-		);
-
-		mGeocoder = new GClientGeocoder();
+			
+			// Handle the map click event.
+			mMap.AttachEvent("onmousedown", mouseHandler);
+			mMap.AttachEvent("onmouseup", mouseHandler);
+			mMap.AttachEvent("onmousemove", mouseHandler);
+		}
+		catch (e)
+		{
+			alert(e.message);
+		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////
 	// ClearTrack: Removes all track points from the map.
 	this.ClearTrack = function ()
 	{
-		mMap.clearOverlays();
+		mMap.DeleteAllShapes();
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -88,7 +125,7 @@ var GMapInterface = new function()
 		// Temporarily add a new function for adding the track points.
 		this.AddTrackPoint = function (lat, lng)
 		{
-			var latlng = new GLatLng(lat, lng);
+			var latlng = new VELatLong(lat, lng);
 			pointarray.push(latlng)
 		}
 
@@ -98,8 +135,9 @@ var GMapInterface = new function()
 			this.AddTrackPoint = null;
 			this.EndTrack = null;
 
-			var polyline = new GPolyline(pointarray, "#ff0000", 5, 0.8);
-			mMap.addOverlay(polyline);
+			var polyline = new VEShape(VEShapeType.Polyline, pointarray);
+			polyline.HideIcon();
+			mMap.AddShape(polyline);
 		};
 	};
 
@@ -107,24 +145,18 @@ var GMapInterface = new function()
 	// CreateMarker: Create a marker on the map (probably for a photo
 	this.CreateMarker = function (id, lat, lng)
 	{
-		var marker = new GMarker(new GLatLng(lat, lng), {draggable: true, dragCrossMove: true, bouncy:true });
-		GEvent.addListener(marker, "click",
-			function()
-			{
-				GTMInterface.MarkerClick(id);
-				//marker.openInfoWindowHtml("test");
-			}
-		);
+		var marker = new VEShape(VEShapeType.Pushpin, new VELatLong(lat, lng));
+		marker.myID = id;
 		
-		GEvent.addListener(marker, "dragend",
-			function()
-			{
-				var latlng = marker.getLatLng();
-				GTMInterface.MarkerDrop(id, latlng.lat(), latlng.lng());
-			}
-		);
+		//GEvent.addListener(marker, "dragend",
+		//	function()
+		//	{
+		//		var latlng = marker.getLatLng();
+		//		GTMInterface.MarkerDrop(id, latlng.lat(), latlng.lng());
+		//	}
+		//);
 
-		mMap.addOverlay(marker);
+		mMap.AddShape(marker);
 		
 		return marker;
 	}
@@ -133,29 +165,20 @@ var GMapInterface = new function()
 	// MoveMarker: Moves a marker to a new location.
 	this.MoveMarker = function (marker, lat, lng)
 	{
-		marker.setLatLng(new GLatLng(lat, lng));
+		marker.SetPoints([new VELatLong(lat, lng)]);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// Search: Find the given address and navigate the map to it.
 	this.Search = function (address)
 	{
-		mGeocoder.getLatLng( address,
-			function(point)
-			{
-				if (!point)
-				{
-					GTMInterface.Alert("\"" + address + "\" not found", "Search Failed");
-				}
-				else
-				{
-					mMap.setCenter(point, 13);
-					var marker = new GMarker(point);
-					mMap.addOverlay(marker);
-					marker.openInfoWindowHtml(address);
-				}
-			}
-		);
-
+		try
+		{
+			mMap.Find(null, address);
+		}
+		catch(e)
+		{
+			GTMInterface.Alert(e);
+		}
 	}
 }
