@@ -80,16 +80,20 @@ namespace Geotagger
             this.usePreviousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useNextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageListSmall = new System.Windows.Forms.ImageList(this.components);
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxSearch = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLoadImages = new System.Windows.Forms.ToolStripButton();
             this.toolStripLoadGPX = new System.Windows.Forms.ToolStripButton();
             this.toolStripLocate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonSave = new System.Windows.Forms.ToolStripButton();
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBoxSearch = new System.Windows.Forms.TextBox();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setMapProviderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.googleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -101,14 +105,15 @@ namespace Geotagger
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarTimeOffset)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.toolsToolStripMenuItem,
             this.debugToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -183,14 +188,14 @@ namespace Geotagger
             // contentsToolStripMenuItem
             // 
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.contentsToolStripMenuItem.Text = "Help...";
             this.contentsToolStripMenuItem.Click += new System.EventHandler(this.contentsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -410,63 +415,6 @@ namespace Geotagger
             this.imageListSmall.ImageSize = new System.Drawing.Size(16, 16);
             this.imageListSmall.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLoadImages,
-            this.toolStripLoadGPX,
-            this.toolStripLocate,
-            this.toolStripButtonSave});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(726, 25);
-            this.toolStrip1.TabIndex = 3;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripLoadImages
-            // 
-            this.toolStripLoadImages.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripLoadImages.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLoadImages.Image")));
-            this.toolStripLoadImages.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripLoadImages.Name = "toolStripLoadImages";
-            this.toolStripLoadImages.Size = new System.Drawing.Size(84, 22);
-            this.toolStripLoadImages.Text = "Load Images...";
-            this.toolStripLoadImages.Click += new System.EventHandler(this.toolStripLoadImages_Click);
-            // 
-            // toolStripLoadGPX
-            // 
-            this.toolStripLoadGPX.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripLoadGPX.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLoadGPX.Image")));
-            this.toolStripLoadGPX.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripLoadGPX.Name = "toolStripLoadGPX";
-            this.toolStripLoadGPX.Size = new System.Drawing.Size(68, 22);
-            this.toolStripLoadGPX.Text = "Load GPX...";
-            this.toolStripLoadGPX.Click += new System.EventHandler(this.toolStripLoadGPX_Click);
-            // 
-            // toolStripLocate
-            // 
-            this.toolStripLocate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripLocate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLocate.Image")));
-            this.toolStripLocate.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripLocate.Name = "toolStripLocate";
-            this.toolStripLocate.Size = new System.Drawing.Size(79, 22);
-            this.toolStripLocate.Text = "Locate Photos";
-            this.toolStripLocate.Click += new System.EventHandler(this.toolStripLocate_Click);
-            // 
-            // toolStripButtonSave
-            // 
-            this.toolStripButtonSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonSave.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonSave.Image")));
-            this.toolStripButtonSave.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonSave.Name = "toolStripButtonSave";
-            this.toolStripButtonSave.Size = new System.Drawing.Size(35, 22);
-            this.toolStripButtonSave.Text = "Save";
-            this.toolStripButtonSave.Click += new System.EventHandler(this.toolStripButtonSave_Click);
-            // 
-            // helpProvider1
-            // 
-            this.helpProvider1.HelpNamespace = "http://code.google.com/p/geotagger/";
-            // 
             // tableLayoutPanel2
             // 
             this.tableLayoutPanel2.ColumnCount = 2;
@@ -524,6 +472,96 @@ namespace Geotagger
             this.textBoxSearch.TabIndex = 2;
             this.textBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxSearch_KeyDown);
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLoadImages,
+            this.toolStripLoadGPX,
+            this.toolStripLocate,
+            this.toolStripButtonSave});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(726, 25);
+            this.toolStrip1.TabIndex = 3;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLoadImages
+            // 
+            this.toolStripLoadImages.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripLoadImages.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLoadImages.Image")));
+            this.toolStripLoadImages.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripLoadImages.Name = "toolStripLoadImages";
+            this.toolStripLoadImages.Size = new System.Drawing.Size(84, 22);
+            this.toolStripLoadImages.Text = "Load Images...";
+            this.toolStripLoadImages.Click += new System.EventHandler(this.toolStripLoadImages_Click);
+            // 
+            // toolStripLoadGPX
+            // 
+            this.toolStripLoadGPX.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripLoadGPX.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLoadGPX.Image")));
+            this.toolStripLoadGPX.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripLoadGPX.Name = "toolStripLoadGPX";
+            this.toolStripLoadGPX.Size = new System.Drawing.Size(68, 22);
+            this.toolStripLoadGPX.Text = "Load GPX...";
+            this.toolStripLoadGPX.Click += new System.EventHandler(this.toolStripLoadGPX_Click);
+            // 
+            // toolStripLocate
+            // 
+            this.toolStripLocate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripLocate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripLocate.Image")));
+            this.toolStripLocate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripLocate.Name = "toolStripLocate";
+            this.toolStripLocate.Size = new System.Drawing.Size(79, 22);
+            this.toolStripLocate.Text = "Locate Photos";
+            this.toolStripLocate.Click += new System.EventHandler(this.toolStripLocate_Click);
+            // 
+            // toolStripButtonSave
+            // 
+            this.toolStripButtonSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonSave.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonSave.Image")));
+            this.toolStripButtonSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSave.Name = "toolStripButtonSave";
+            this.toolStripButtonSave.Size = new System.Drawing.Size(35, 22);
+            this.toolStripButtonSave.Text = "Save";
+            this.toolStripButtonSave.Click += new System.EventHandler(this.toolStripButtonSave_Click);
+            // 
+            // helpProvider1
+            // 
+            this.helpProvider1.HelpNamespace = "http://code.google.com/p/geotagger/";
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.setMapProviderToolStripMenuItem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // setMapProviderToolStripMenuItem
+            // 
+            this.setMapProviderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.googleToolStripMenuItem,
+            this.bingToolStripMenuItem});
+            this.setMapProviderToolStripMenuItem.Name = "setMapProviderToolStripMenuItem";
+            this.setMapProviderToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.setMapProviderToolStripMenuItem.Text = "Set Map Provider";
+            // 
+            // googleToolStripMenuItem
+            // 
+            this.googleToolStripMenuItem.Checked = true;
+            this.googleToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.googleToolStripMenuItem.Name = "googleToolStripMenuItem";
+            this.googleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.googleToolStripMenuItem.Text = "Google";
+            this.googleToolStripMenuItem.Click += new System.EventHandler(this.googleToolStripMenuItem_Click);
+            // 
+            // bingToolStripMenuItem
+            // 
+            this.bingToolStripMenuItem.Name = "bingToolStripMenuItem";
+            this.bingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bingToolStripMenuItem.Text = "Bing";
+            this.bingToolStripMenuItem.Click += new System.EventHandler(this.bingToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -553,10 +591,10 @@ namespace Geotagger
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarTimeOffset)).EndInit();
             this.contextMenuStrip1.ResumeLayout(false);
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -603,6 +641,10 @@ namespace Geotagger
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxSearch;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem setMapProviderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem googleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bingToolStripMenuItem;
     }
 }
 

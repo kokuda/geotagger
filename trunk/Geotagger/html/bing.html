@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+		<title>Geotagger Map</title>
+		<style type="text/css">
+			v\:* {
+				behavior:url(#default#VML);
+			}
+		</style>
+
+		<!-- Make the document body take up the full screen -->
+		<style type="text/css">
+			html, body {width: 100%; height: 100%}
+			body {margin-top: 0px; margin-right: 0px; margin-left: 0px; margin-bottom: 0px}
+		</style>
+
+	<script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6.2"></script>
+
+    <!-- Include GeoTaggerMap (GTM) scripting interface functions -->
+	<script src="gtminterface.js" type="text/javascript"></script>
+
+	<!-- Include Bing map (BMap) scripting interface functions -->
+	<script src="bmapinterface.js" type="text/javascript"></script>
+
+	<!-- Include offline map scripting interface functions -->
+	<script src="nomapinterface.js" type="text/javascript"></script>
+
+	<script type="text/javascript">
+	//<![CDATA[
+
+	function onLoad()
+	{
+		if (BMapInterface.IsAvailable())
+		{
+			// Initialize Google Maps implementation of callback interface
+			BMapInterface.Initialize("map");
+
+			// Initialize generic callback interface
+			GTMInterface.Initialize(BMapInterface);
+		}
+		else
+		{
+			NoMapInterface.Initialize(document.getElementById("map"));
+			GTMInterface.Initialize(NoMapInterface);
+		}
+	}
+
+	//]]>
+	</script>
+	</head>
+	<body onload="onLoad()">
+		<div id="map" style="width: 100%; height: 100%;">Loading...</div>
+	</body>
+</html>

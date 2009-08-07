@@ -130,6 +130,8 @@
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="html\bing.html" />
+    <Content Include="html\bmapinterface.js" />
     <Content Include="html\gmapinterface.js" />
     <Content Include="html\gtminterface.js" />
     <Content Include="html\nomapinterface.js" />

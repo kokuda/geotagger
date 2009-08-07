@@ -62,7 +62,7 @@ namespace Geotagger
             int port = mHttpServer.GetPort();
 
             // Load the page from the HttpServer.
-            webBrowser1.Navigate(new Uri("http://127.0.0.1:"+port+"/html/start.html"));
+            LoadGoogleMaps();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -96,6 +96,28 @@ namespace Geotagger
             photo.SetLocation(lat, lng, photo.elevation);
             listView1.SelectedItems.Clear();
             listView1.Items[photoIndex].Selected = true;
+        }
+
+        private void LoadGoogleMaps()
+        {
+            int port = mHttpServer.GetPort();
+            webBrowser1.Navigate(new Uri("http://127.0.0.1:" + port + "/html/start.html"));
+            // If we had a notification of when the map was loaded we could reload the track
+
+            // Update the check mark
+            bingToolStripMenuItem.Checked = false;
+            googleToolStripMenuItem.Checked = true;
+        }
+
+        private void LoadBingMaps()
+        {
+            int port = mHttpServer.GetPort();
+            webBrowser1.Navigate(new Uri("http://127.0.0.1:" + port + "/html/bing.html"));
+            // If we had a notification of when the map was loaded we could reload the track
+
+            // Update the check mark
+            bingToolStripMenuItem.Checked = true;
+            googleToolStripMenuItem.Checked = false;
         }
 
         // End it all!
@@ -190,7 +212,7 @@ namespace Geotagger
             PhotoData photo = mPhotoCollection.GetPhoto(e.Item.ImageKey);
             pictureBox1.Image = photo.thumbnail;
             labelTimeOutput.Text = photo.dateTime.ToString("G");
-            labelLocationOutput.Text = photo.latitude + "," + photo.longitude;
+            labelLocationOutput.Text = String.Format("{0:F3}, {0:F3}", photo.latitude, photo.longitude);
         }
 
         private void toolStripLoadImages_Click(object sender, EventArgs e)
@@ -379,6 +401,16 @@ namespace Geotagger
             {
                 mMapInterface.Search(textBoxSearch.Text);
             }
+        }
+
+        private void googleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadGoogleMaps();
+        }
+
+        private void bingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadBingMaps();
         }
     }
 }
